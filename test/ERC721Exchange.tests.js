@@ -62,17 +62,19 @@ describe("ERC721Exchange", function () {
     const reRegister = await txRegister.wait();
     const [evRegister] = reRegister.events;   
     const exId = evRegister.args.exchangeId.toNumber();
-/*
+
     try{
       const txCancelC = await exContract.connect(ownerC.address).cancel(exId);
       expect(false).to.equal(true);
+      console.log("Cancel an exchange by non-owner should fail");
     }catch(e){ 
     }
-    */
+    
     const txCancel = await exContract.connect(ownerA).cancel(exId);
     const reCancel = await txCancel.wait();
 
-    //const txGetExchange = await exContract.connect(ownerA.address).getExchange(exId);
-    //console.log(txGetExchange); 
+    const txGetExchange = await exContract.connect(ownerA.address).getExchange(exId);
+    expect(txGetExchange.StateA).to.equal(3); 
+    expect(txGetExchange.StateB).to.equal(3); 
   });
 });

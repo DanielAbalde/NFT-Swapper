@@ -86,6 +86,7 @@ abstract contract NFTExchange is Context
         require(e.StateA != ExchangeState.Cancelled && e.StateB != ExchangeState.Cancelled, "NFTExchange: state is already cancelled");
         e.StateA = ExchangeState.Cancelled;
         e.StateB = ExchangeState.Cancelled;
+        _exchanges[exchangeId] = e;
         address thisContract = address(this);
         for(uint256 i=0; i<e.NFTContractA.length; i++){
             if(ownerOf(e.NFTContractA[i], e.tokenIdsA[i]) == thisContract){
@@ -117,6 +118,7 @@ abstract contract NFTExchange is Context
                 }
                 require(transferBatchOwnership(_msgSender(), nftAddresses, tokenIds, address(this)), "NFTExchange: deposit: transfer ownership failed");
                 e.StateA = ExchangeState.Deposited;
+                _exchanges[exchangeId] = e;
                 emit ExchangeStateChanged(exchangeId, ExchangeState.Deposited);
                 return true;
             }
@@ -129,6 +131,7 @@ abstract contract NFTExchange is Context
                 }
                 require(transferBatchOwnership(_msgSender(), nftAddresses, tokenIds, address(this)), "NFTExchange: deposit: operation failed");
                 e.StateB = ExchangeState.Deposited;
+                _exchanges[exchangeId] = e;
                 emit ExchangeStateChanged(exchangeId, ExchangeState.Deposited);
                 return true;
             }
@@ -151,6 +154,7 @@ abstract contract NFTExchange is Context
             e.StateA = ExchangeState.Claimed;
             require(transferBatchOwnership(address(this), e.NFTContractA, e.tokenIdsA, e.OwnerB), "NFTExchange: claim: contract to B failed");
             e.StateB = ExchangeState.Claimed;
+            _exchanges[exchangeId] = e;
             emit ExchangeStateChanged(exchangeId, ExchangeState.Claimed);
             return true; 
         }else{
