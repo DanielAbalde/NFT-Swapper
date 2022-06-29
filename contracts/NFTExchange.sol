@@ -5,8 +5,8 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 /**
- * @title NFT contract with on-chain metadata,
- * making quick and easy to create html/js NFTs, parametric NFTs or any NFT with dynamic metadata.
+ * @title NFTExchange
+ * Trustless and self-soveraign exchange of multiple NFT between two partipants.  
  * @author Daniel Gonzalez Abalde aka @DGANFT aka DaniGA#9856.
  * @dev Inherits from this contract for each NFT type. 
  */
@@ -14,7 +14,7 @@ abstract contract NFTExchange is Context
 {
     using Counters for Counters.Counter;  
 
-    enum ExchangeState{ Pending, Supplied, Claimed, Cancelled }
+    enum ExchangeState{ Pending, Deposited, Claimed, Cancelled }
     event ExchangeStateChanged(uint256 exchangeId, ExchangeState state);
 
     struct Exchange{
@@ -107,8 +107,8 @@ abstract contract NFTExchange is Context
                     require(e.tokenIdsA[i] == tokenIds[i], "NFTExchange: deposit: different token id");
                 }
                 require(transferOwnership(_msgSender(), nftAddresses, tokenIds, address(this)), "NFTExchange: deposit: transfer ownership failed");
-                e.StateA = ExchangeState.Supplied;
-                emit ExchangeStateChanged(exchangeId, ExchangeState.Supplied);
+                e.StateA = ExchangeState.Deposited;
+                emit ExchangeStateChanged(exchangeId, ExchangeState.Deposited);
                 return true;
             }
         }else if(e.OwnerB == _msgSender()){
@@ -119,8 +119,8 @@ abstract contract NFTExchange is Context
                     require(e.tokenIdsB[i] == tokenIds[i], "NFTExchange: deposit: different token id");
                 }
                 require(transferOwnership(_msgSender(), nftAddresses, tokenIds, address(this)), "NFTExchange: deposit: operation failed");
-                e.StateB = ExchangeState.Supplied;
-                emit ExchangeStateChanged(exchangeId, ExchangeState.Supplied);
+                e.StateB = ExchangeState.Deposited;
+                emit ExchangeStateChanged(exchangeId, ExchangeState.Deposited);
                 return true;
             }
         }
@@ -135,9 +135,9 @@ abstract contract NFTExchange is Context
                     existsExchangeId(exchangeId) public returns (bool)
     {
         Exchange memory e = _exchanges[exchangeId]; 
-        require(e.StateA == ExchangeState.Supplied, "NFTExchange: claim: state A is not supplied");
-        require(e.StateB == ExchangeState.Supplied, "NFTExchange: claim: state B is not supplied");
-        if(e.StateA == ExchangeState.Supplied && e.StateB == ExchangeState.Supplied){ 
+        require(e.StateA == ExchangeState.Deposited, "NFTExchange: claim: state A is not supplied");
+        require(e.StateB == ExchangeState.Deposited, "NFTExchange: claim: state B is not supplied");
+        if(e.StateA == ExchangeState.Deposited && e.StateB == ExchangeState.Deposited){ 
             require(transferOwnership(address(this), e.NFTContractB, e.tokenIdsB, e.OwnerA), "NFTExchange: claim: contract to A failed");
             e.StateA = ExchangeState.Claimed;
             require(transferOwnership(address(this), e.NFTContractA, e.tokenIdsA, e.OwnerB), "NFTExchange: claim: contract to B failed");
@@ -160,8 +160,8 @@ abstract contract NFTExchange is Context
         if(e.StateA == ExchangeState.Pending || e.StateB == ExchangeState.Pending){
             return ExchangeState.Pending;
         }
-        if(e.StateA == ExchangeState.Supplied && e.StateB == ExchangeState.Supplied){
-            return ExchangeState.Supplied;
+        if(e.StateA == ExchangeState.Deposited && e.StateB == ExchangeState.Deposited){
+            return ExchangeState.Deposited;
         }
         if(e.StateA == ExchangeState.Cancelled || e.StateB == ExchangeState.Cancelled){
             return ExchangeState.Cancelled;

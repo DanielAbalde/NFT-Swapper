@@ -1,5 +1,5 @@
 <h1 align="center"> Decentralized NFT Exchange </h1> 
-<p align="center">Trustless and self-soveraign exchange of multiple NFT</p>
+<p align="center">Trustless and self-soveraign exchange of multiple NFT between two participants</p>
 
 
 
