@@ -14,7 +14,12 @@ contract ERC721Exchange is NFTExchange, IERC721Receiver{
         return IERC721(nft).ownerOf(tokenId);
     }
 
-    function transferOwnership(address owner, address[] memory nftAddresses, uint256[] memory tokenIds, address recipient)
+    function transferOwnership(address owner, address nftAddress, uint256 tokenId, address recipient)
+                                public override returns(bool){
+         IERC721(nftAddress).safeTransferFrom(owner, recipient, tokenId);
+         return true;
+    }
+    function transferBatchOwnership(address owner, address[] memory nftAddresses, uint256[] memory tokenIds, address recipient)
                                 public override returns(bool){
         require(nftAddresses.length == tokenIds.length, "NFTExchange: transferOwnership: different length");
         for(uint256 i=0; i<nftAddresses.length; i++){

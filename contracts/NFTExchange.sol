@@ -31,8 +31,8 @@ abstract contract NFTExchange is Context
  
     function ownerOf(address nft, uint256 tokenId) public view virtual returns (address);
 
-    function transferOwnership(address owner, address[] memory nftAddresses, uint256[] memory tokenIds, address recipient)
-     public virtual returns(bool);
+    function transferOwnership(address owner, address nftAddress, uint256 tokenId, address recipient) public virtual returns(bool);
+    function transferBatchOwnership(address owner, address[] memory nftAddresses, uint256[] memory tokenIds, address recipient) public virtual returns(bool);
 
     modifier onlyOwnerOf(address account, address[] memory nftAddresses, uint256[] memory tokenIds){
         require(nftAddresses.length == tokenIds.length, "NFTExchange: onlyOwnerOf: different length");
@@ -86,8 +86,17 @@ abstract contract NFTExchange is Context
         require(e.StateA != ExchangeState.Cancelled && e.StateB != ExchangeState.Cancelled, "NFTExchange: state is already cancelled");
         e.StateA = ExchangeState.Cancelled;
         e.StateB = ExchangeState.Cancelled;
-        transferOwnership(address(this), e.NFTContractA, e.tokenIdsA, e.OwnerA);
-        transferOwnership(address(this), e.NFTContractB, e.tokenIdsB, e.OwnerB);
+        address thisContract = address(this);
+        for(uint256 i=0; i<e.NFTContractA.length; i++){
+            if(ownerOf(e.NFTContractA[i], e.tokenIdsA[i]) == thisContract){
+                transferOwnership(thisContract, e.NFTContractA[i], e.tokenIdsA[i], e.OwnerA);
+            }
+        }
+        for(uint256 i=0; i<e.NFTContractB.length; i++){
+            if(ownerOf(e.NFTContractB[i], e.tokenIdsB[i]) == thisContract){
+                transferOwnership(thisContract, e.NFTContractB[i], e.tokenIdsB[i], e.OwnerB);
+            }
+        }
         emit ExchangeStateChanged(exchangeId, ExchangeState.Cancelled);
     }
     /**
@@ -106,7 +115,7 @@ abstract contract NFTExchange is Context
                     require(e.NFTContractA[i] == nftAddresses[i], "NFTExchange: deposit: different NFT contract");
                     require(e.tokenIdsA[i] == tokenIds[i], "NFTExchange: deposit: different token id");
                 }
-                require(transferOwnership(_msgSender(), nftAddresses, tokenIds, address(this)), "NFTExchange: deposit: transfer ownership failed");
+                require(transferBatchOwnership(_msgSender(), nftAddresses, tokenIds, address(this)), "NFTExchange: deposit: transfer ownership failed");
                 e.StateA = ExchangeState.Deposited;
                 emit ExchangeStateChanged(exchangeId, ExchangeState.Deposited);
                 return true;
@@ -118,7 +127,7 @@ abstract contract NFTExchange is Context
                     require(e.NFTContractB[i] == nftAddresses[i], "NFTExchange: deposit: different NFT contract");
                     require(e.tokenIdsB[i] == tokenIds[i], "NFTExchange: deposit: different token id");
                 }
-                require(transferOwnership(_msgSender(), nftAddresses, tokenIds, address(this)), "NFTExchange: deposit: operation failed");
+                require(transferBatchOwnership(_msgSender(), nftAddresses, tokenIds, address(this)), "NFTExchange: deposit: operation failed");
                 e.StateB = ExchangeState.Deposited;
                 emit ExchangeStateChanged(exchangeId, ExchangeState.Deposited);
                 return true;
@@ -128,7 +137,7 @@ abstract contract NFTExchange is Context
     }
     /**
     * @dev Claims completion of an exchange. 
-    * If both participants have deposit their NFTs, the first to claim makes the exchange and the NFTs are sent to their new owners.
+    * If both participants have deposit their NFTs, the first to claim trigger the exchange and the NFTs are sent to their new owners.
     * @param exchangeId the exchange identifier. 
     */
     function claim(uint256 exchangeId)
@@ -138,9 +147,9 @@ abstract contract NFTExchange is Context
         require(e.StateA == ExchangeState.Deposited, "NFTExchange: claim: state A is not supplied");
         require(e.StateB == ExchangeState.Deposited, "NFTExchange: claim: state B is not supplied");
         if(e.StateA == ExchangeState.Deposited && e.StateB == ExchangeState.Deposited){ 
-            require(transferOwnership(address(this), e.NFTContractB, e.tokenIdsB, e.OwnerA), "NFTExchange: claim: contract to A failed");
+            require(transferBatchOwnership(address(this), e.NFTContractB, e.tokenIdsB, e.OwnerA), "NFTExchange: claim: contract to A failed");
             e.StateA = ExchangeState.Claimed;
-            require(transferOwnership(address(this), e.NFTContractA, e.tokenIdsA, e.OwnerB), "NFTExchange: claim: contract to B failed");
+            require(transferBatchOwnership(address(this), e.NFTContractA, e.tokenIdsA, e.OwnerB), "NFTExchange: claim: contract to B failed");
             e.StateB = ExchangeState.Claimed;
             emit ExchangeStateChanged(exchangeId, ExchangeState.Claimed);
             return true; 

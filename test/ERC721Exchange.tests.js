@@ -26,7 +26,7 @@ describe("Test721", function(){
 });
 
 describe("ERC721Exchange", function () {
-  it("Register a new exchange and get exchange", async function () {
+  it("Register a new exchange and get exchange data", async function () {
     const [signer, ownerA, ownerB] = await ethers.getSigners();  
 
     const exFactory = await ethers.getContractFactory("ERC721Exchange");
@@ -49,5 +49,30 @@ describe("ERC721Exchange", function () {
     expect(txGetExchange.OwnerB).to.equal(ownerB.address); 
     expect(txGetExchange.NFTContractB[0]).to.equal(nftContract.address);
     expect(txGetExchange.tokenIdsB[0].toNumber()).to.equal(5); 
+  });
+
+  it("Cancel an exchange", async function () {
+    const [signer, ownerA, ownerB, ownerC] = await ethers.getSigners();  
+
+    const exFactory = await ethers.getContractFactory("ERC721Exchange");
+    const exContract = await exFactory.deploy();
+    await exContract.deployed();
+   
+    const txRegister = await exContract.register(ownerA.address, [nftContract.address], [1], ownerB.address, [nftContract.address], [5]);
+    const reRegister = await txRegister.wait();
+    const [evRegister] = reRegister.events;   
+    const exId = evRegister.args.exchangeId.toNumber();
+/*
+    try{
+      const txCancelC = await exContract.connect(ownerC.address).cancel(exId);
+      expect(false).to.equal(true);
+    }catch(e){ 
+    }
+    */
+    const txCancel = await exContract.connect(ownerA).cancel(exId);
+    const reCancel = await txCancel.wait();
+
+    //const txGetExchange = await exContract.connect(ownerA.address).getExchange(exId);
+    //console.log(txGetExchange); 
   });
 });
