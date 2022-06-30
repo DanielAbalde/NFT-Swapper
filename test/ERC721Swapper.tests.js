@@ -25,7 +25,7 @@ describe("Test721", function(){
   });
 });
 
-describe("ERC721Exchange", function () {
+describe("ERC721Swapper", function () {
   let exContract;
   let signer, ownerA, ownerB, ownerC;
 
@@ -36,7 +36,7 @@ describe("ERC721Exchange", function () {
     console.log("ownerB: " + ownerB.address);
     console.log("ownerC: " + ownerC.address);
 
-    const exFactory = await ethers.getContractFactory("ERC721Exchange");
+    const exFactory = await ethers.getContractFactory("ERC721Swapper");
     exContract = await exFactory.deploy();
     await exContract.deployed();
 
@@ -56,46 +56,46 @@ describe("ERC721Exchange", function () {
     expect(evApproveC.args.approved).to.equal(true);
   });
 
-  it("Register a new exchange and get exchange data", async function () {
+  it("Register a new swap and get its swap data", async function () {
     
     const txRegister = await exContract.register(ownerA.address, [nftContract.address, nftContract.address], [1, 2], ownerB.address, [nftContract.address, nftContract.address], [5, 6]);
     const reRegister = await txRegister.wait();
     const [evRegister] = reRegister.events;  
-    expect(evRegister.args.exchangeId.toNumber()).to.equal(1);
+    expect(evRegister.args.swapId.toNumber()).to.equal(1);
 
-    const txGetExchanges = await exContract.connect(ownerA.address).getExchanges();
-    const exId = txGetExchanges[0].toNumber();
+    const txGetSwaps = await exContract.connect(ownerA.address).getSwaps();
+    const exId = txGetSwaps[0].toNumber();
     expect(exId).to.equal(1);
 
-    const txGetExchange = await exContract.connect(ownerA.address).getExchange(exId);
-    expect(txGetExchange.OwnerA).to.equal(ownerA.address);
-    expect(txGetExchange.NFTContractA[0]).to.equal(nftContract.address);
-    expect(txGetExchange.tokenIdsA[0].toNumber()).to.equal(1);
-    expect(txGetExchange.OwnerB).to.equal(ownerB.address); 
-    expect(txGetExchange.NFTContractB[0]).to.equal(nftContract.address);
-    expect(txGetExchange.tokenIdsB[0].toNumber()).to.equal(5); 
+    const txGetSwap = await exContract.connect(ownerA.address).getSwap(exId);
+    expect(txGetSwap.OwnerA).to.equal(ownerA.address);
+    expect(txGetSwap.NFTContractA[0]).to.equal(nftContract.address);
+    expect(txGetSwap.tokenIdsA[0].toNumber()).to.equal(1);
+    expect(txGetSwap.OwnerB).to.equal(ownerB.address); 
+    expect(txGetSwap.NFTContractB[0]).to.equal(nftContract.address);
+    expect(txGetSwap.tokenIdsB[0].toNumber()).to.equal(5); 
   });
 
-  it("Cancel an exchange", async function () {
+  it("Cancel a swap", async function () {
 
     const txRegister = await exContract.register(ownerA.address, [nftContract.address], [1], ownerB.address, [nftContract.address], [5]);
     const reRegister = await txRegister.wait();
     const [evRegister] = reRegister.events;   
-    const exId = evRegister.args.exchangeId.toNumber();
+    const exId = evRegister.args.swapId.toNumber();
 
     try{
       const txCancelC = await exContract.connect(ownerC.address).cancel(exId);
       expect(false).to.equal(true);
-      console.log("Cancel an exchange by non-owner should fail");
+      console.log("Cancel an swap by non-owner should fail");
     }catch(e){ 
     }
     
     const txCancel = await exContract.connect(ownerA).cancel(exId);
     const reCancel = await txCancel.wait();
 
-    const txGetExchange = await exContract.connect(ownerA.address).getExchange(exId);
-    expect(txGetExchange.StateA).to.equal(3); 
-    expect(txGetExchange.StateB).to.equal(3); 
+    const txGetSwap = await exContract.connect(ownerA.address).getSwap(exId);
+    expect(txGetSwap.StateA).to.equal(3); 
+    expect(txGetSwap.StateB).to.equal(3); 
   });
 
   
@@ -104,7 +104,7 @@ describe("ERC721Exchange", function () {
     const txRegister = await exContract.connect(ownerA).register(ownerA.address, [nftContract.address], [3], ownerB.address, [nftContract.address], [8]);
     const reRegister = await txRegister.wait();
     const [evRegister] = reRegister.events;   
-    const exId = evRegister.args.exchangeId.toNumber();
+    const exId = evRegister.args.swapId.toNumber();
  
     /*
     const txDepositA = await exContract.connect(ownerA).deposit(exId, [nftContract.address], [3]);
@@ -118,16 +118,16 @@ describe("ERC721Exchange", function () {
     try{
       const txCancelC = await exContract.connect(ownerC.address).cancel(exId);
       expect(false).to.equal(true);
-      console.log("Cancel an exchange by non-owner should fail");
+      console.log("Cancel an swap by non-owner should fail");
     }catch(e){ 
     }
     
     const txCancel = await exContract.connect(ownerA).cancel(exId);
     const reCancel = await txCancel.wait();
 
-    const txGetExchange = await exContract.connect(ownerA.address).getExchange(exId);
-    expect(txGetExchange.StateA).to.equal(3); 
-    expect(txGetExchange.StateB).to.equal(3); */
+    const txGetSwap = await exContract.connect(ownerA.address).getSwap(exId);
+    expect(txGetSwap.StateA).to.equal(3); 
+    expect(txGetSwap.StateB).to.equal(3); */
   });
 
   

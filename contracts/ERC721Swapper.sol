@@ -3,13 +3,13 @@ pragma solidity ^0.8.4;
 
 import "hardhat/console.sol";
 
-import "./NFTExchange.sol"; 
+import "./NFTSwapper.sol"; 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
-contract ERC721Exchange is NFTExchange, IERC721Receiver{
+contract ERC721Swapper is NFTSwapper, IERC721Receiver{
   
-    constructor() NFTExchange() {}
+    constructor() NFTSwapper() {}
 
     function ownerOf(address nft, uint256 tokenId) 
                         public view override returns (address){
