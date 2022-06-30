@@ -121,31 +121,29 @@ abstract contract NFTSwapper is Context
                     public returns (bool deposited){
         Swap memory e = _swaps[swapId]; 
         if(e.OwnerA == _msgSender()){
-            if(e.StateA == SwapState.Pending){ 
-                require(e.NFTContractA.length == nftAddresses.length, "NFTSwapper: deposit: different length");
-                for (uint256 i=0; i<nftAddresses.length; i++){
-                    require(e.NFTContractA[i] == nftAddresses[i], "NFTSwapper: deposit: different NFT contract");
-                    require(e.tokenIdsA[i] == tokenIds[i], "NFTSwapper: deposit: different token id");
-                }
-                require(transferBatchOwnership(e.OwnerA, e.NFTContractA, e.tokenIdsA, address(this)), "NFTSwapper: deposit: transfer ownership failed");
-                e.StateA = SwapState.Deposited;
-                _swaps[swapId] = e;
-                emit SwapStateChanged(swapId, SwapState.Deposited);
-                deposited = true;
+            require(e.StateA == SwapState.Pending, "NFTSwapper: deposit: state is not pending"); 
+            require(e.NFTContractA.length == nftAddresses.length, "NFTSwapper: deposit: different length");
+            for (uint256 i=0; i<e.NFTContractA.length; i++){
+                require(e.NFTContractA[i] == nftAddresses[i], "NFTSwapper: deposit: different NFT contract");
+                require(e.tokenIdsA[i] == tokenIds[i], "NFTSwapper: deposit: different token id");
             }
+            require(transferBatchOwnership(e.OwnerA, e.NFTContractA, e.tokenIdsA, address(this)), "NFTSwapper: deposit: transfer ownership failed");
+            e.StateA = SwapState.Deposited;
+            _swaps[swapId] = e;
+            emit SwapStateChanged(swapId, SwapState.Deposited);
+            deposited = true; 
         }else if(e.OwnerB == _msgSender()){
-            if(e.StateB == SwapState.Pending){ 
-                require(e.NFTContractB.length == nftAddresses.length, "NFTSwapper: deposit: different length");
-                for (uint256 i=0; i<nftAddresses.length; i++){
-                    require(e.NFTContractB[i] == nftAddresses[i], "NFTSwapper: deposit: different NFT contract");
-                    require(e.tokenIdsB[i] == tokenIds[i], "NFTSwapper: deposit: different token id");
-                }
-                require(transferBatchOwnership(e.OwnerB, e.NFTContractB, e.tokenIdsB, address(this)), "NFTSwapper: deposit: operation failed");
-                e.StateB = SwapState.Deposited;
-                _swaps[swapId] = e;
-                emit SwapStateChanged(swapId, SwapState.Deposited);
-                deposited = true;
+            require(e.StateB == SwapState.Pending, "NFTSwapper: deposit: state is not pending"); 
+            require(e.NFTContractB.length == nftAddresses.length, "NFTSwapper: deposit: different length");
+            for (uint256 i=0; i<e.NFTContractB.length; i++){
+                require(e.NFTContractB[i] == nftAddresses[i], "NFTSwapper: deposit: different NFT contract");
+                require(e.tokenIdsB[i] == tokenIds[i], "NFTSwapper: deposit: different token id");
             }
+            require(transferBatchOwnership(e.OwnerB, e.NFTContractB, e.tokenIdsB, address(this)), "NFTSwapper: deposit: operation failed");
+            e.StateB = SwapState.Deposited;
+            _swaps[swapId] = e;
+            emit SwapStateChanged(swapId, SwapState.Deposited);
+            deposited = true; 
         }
         deposited = false;
     }
@@ -179,7 +177,7 @@ abstract contract NFTSwapper is Context
     */
     function getState(uint256 swapId) existsSwapId(swapId) public view returns (SwapState){  
         Swap memory e = _swaps[swapId];
-        if(e.StateA == SwapState.Claimed || e.StateB == SwapState.Claimed){
+        if(e.StateA == SwapState.Claimed && e.StateB == SwapState.Claimed){
             return SwapState.Claimed;
         }
         if(e.StateA == SwapState.Pending || e.StateB == SwapState.Pending){

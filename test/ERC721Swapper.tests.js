@@ -85,8 +85,8 @@ describe("ERC721Swapper", function () {
 
     try{
       const txCancelC = await exContract.connect(ownerC.address).cancel(exId);
-      expect(false).to.equal(true);
       console.log("Cancel an swap by non-owner should fail");
+      expect(false).to.equal(true); 
     }catch(e){ 
     }
     
@@ -101,34 +101,71 @@ describe("ERC721Swapper", function () {
   
   it("Deposit NFT", async function () {
  
-    const txRegister = await exContract.connect(ownerA).register(ownerA.address, [nftContract.address], [3], ownerB.address, [nftContract.address], [8]);
+    const addA = [nftContract.address];
+    const idA = [3];
+    const addB = [nftContract.address];
+    const idB = [8];
+    
+    // Register
+    const txRegister = await exContract.connect(ownerA).register(ownerA.address, addA, idA, ownerB.address, addB, idB);
     const reRegister = await txRegister.wait();
     const [evRegister] = reRegister.events;   
-    const exId = evRegister.args.swapId.toNumber();
+    let exId = evRegister.args.swapId.toNumber();
  
-    /*
-    const txDepositA = await exContract.connect(ownerA).deposit(exId, [nftContract.address], [3]);
-    const reDepositA = await txDepositA.wait();
-    console.log(reDepositA);
-    */
-    const txDepositB = await exContract.connect(ownerB).deposit(exId, [nftContract.address], [8]);
-    const reDepositB = await txDepositB.wait();
-    console.log(reDepositB);
-  /*
-    try{
-      const txCancelC = await exContract.connect(ownerC.address).cancel(exId);
-      expect(false).to.equal(true);
-      console.log("Cancel an swap by non-owner should fail");
-    }catch(e){ 
-    }
-    
-    const txCancel = await exContract.connect(ownerA).cancel(exId);
-    const reCancel = await txCancel.wait();
+    // Deposit A check states
+    const txDepositA = await exContract.connect(ownerA).deposit(exId, addA, idA);
+    const reDepositA = await txDepositA.wait(); 
+    expect(reDepositA.events[2].args.state).to.equal(1); 
+    expect((await nftContract.ownerOf(idA[0]))).to.equal(exContract.address);
 
-    const txGetSwap = await exContract.connect(ownerA.address).getSwap(exId);
-    expect(txGetSwap.StateA).to.equal(3); 
-    expect(txGetSwap.StateB).to.equal(3); */
+    const txGetSwapA = await exContract.connect(ownerA.address).getSwap(exId);
+    expect(txGetSwapA.StateA).to.equal(1); 
+    expect(txGetSwapA.StateB).to.equal(0); 
+    expect((await exContract.connect(ownerA.address).getState(exId))).to.equal(0); 
+
+    try{
+      // Deposit other NFT should fail
+      const txDepositF = await exContract.connect(ownerB).deposit(exId, addB, [9]);
+      const reDepositF = await txDepositF.wait(); 
+      console.log("Deposit other NFT should fail");
+      expect(false).to.equal(true); 
+    }catch(e){  
+      //console.log(e);
+    } 
+
+    // Deposit B check states
+    const txDepositB = await exContract.connect(ownerB).deposit(exId, addB, idB);
+    const reDepositB = await txDepositB.wait(); 
+    expect(reDepositB.events[2].args.state).to.equal(1); 
+    expect((await nftContract.ownerOf(idB[0]))).to.equal(exContract.address);
+ 
+    const txGetSwapB = await exContract.connect(ownerB.address).getSwap(exId);
+    expect(txGetSwapB.StateA).to.equal(1); 
+    expect(txGetSwapB.StateB).to.equal(1);
+    expect((await exContract.connect(ownerA.address).getState(exId))).to.equal(1); 
+
+    try{
+      // Deposit again should fail
+      const txDepositF = await exContract.connect(ownerB).deposit(exId, addB, idB);
+      const reDepositF = await txDepositF.wait(); 
+      console.log("Deposit again should fail");
+      expect(false).to.equal(true); 
+    }catch(e){  
+      //console.log(e);
+    } 
+
+    try{
+      // Deposit by not participant should fail
+      const txDepositC = await exContract.connect(ownerC).deposit(exId, addB, idB);
+      const reDepositC = await txDepositC.wait(); 
+      console.log("Deposit by non-participant should fail");
+      expect(false).to.equal(true); 
+    }catch(e){ 
+      //console.log(e);
+    }  
   });
 
-  
+  it("Claim NFT", async function () {
+    
+  });
 });

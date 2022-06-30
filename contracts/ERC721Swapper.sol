@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "hardhat/console.sol";
-
 import "./NFTSwapper.sol"; 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
@@ -23,8 +21,6 @@ contract ERC721Swapper is NFTSwapper, IERC721Receiver{
     }
     function transferBatchOwnership(address from, address[] memory nftAddresses, uint256[] memory tokenIds, address to)
                                 public override returns(bool){
-        console.log("_msgSender=", _msgSender(), " from=", from);
-        console.log("owner=", IERC721(nftAddresses[0]).ownerOf(tokenIds[0]));
         require(nftAddresses.length == tokenIds.length, "ERC721Exchange: transferBatchOwnership: different length");
         for(uint256 i=0; i<nftAddresses.length; i++){
             IERC721(nftAddresses[i]).safeTransferFrom(from, to, tokenIds[i]);
