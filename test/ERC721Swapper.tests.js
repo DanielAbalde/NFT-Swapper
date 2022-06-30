@@ -84,16 +84,17 @@ describe("ERC721Swapper", function () {
     const exId = evRegister.args.swapId.toNumber();
 
     try{
-      const txCancelC = await exContract.connect(ownerC.address).cancel(exId);
+      const txCancelC = await exContract.connect(ownerC).cancel(exId);
       console.log("Cancel an swap by non-owner should fail");
       expect(false).to.equal(true); 
     }catch(e){ 
+      //console.log(e);
     }
     
     const txCancel = await exContract.connect(ownerA).cancel(exId);
     const reCancel = await txCancel.wait();
 
-    const txGetSwap = await exContract.connect(ownerA.address).getSwap(exId);
+    const txGetSwap = await exContract.connect(ownerA).getSwap(exId);
     expect(txGetSwap.StateA).to.equal(3); 
     expect(txGetSwap.StateB).to.equal(3); 
   });
@@ -115,7 +116,7 @@ describe("ERC721Swapper", function () {
     // Deposit A check states
     const txDepositA = await exContract.connect(ownerA).deposit(exId, addA, idA);
     const reDepositA = await txDepositA.wait(); 
-    expect(reDepositA.events[2].args.state).to.equal(1); 
+    expect(reDepositA.events[reDepositA.events.length-1].args.state).to.equal(1); 
     expect((await nftContract.ownerOf(idA[0]))).to.equal(exContract.address);
 
     const txGetSwapA = await exContract.connect(ownerA.address).getSwap(exId);
@@ -136,7 +137,7 @@ describe("ERC721Swapper", function () {
     // Deposit B check states
     const txDepositB = await exContract.connect(ownerB).deposit(exId, addB, idB);
     const reDepositB = await txDepositB.wait(); 
-    expect(reDepositB.events[2].args.state).to.equal(1); 
+    expect(reDepositB.events[reDepositA.events.length-1].args.state).to.equal(1); 
     expect((await nftContract.ownerOf(idB[0]))).to.equal(exContract.address);
  
     const txGetSwapB = await exContract.connect(ownerB.address).getSwap(exId);
@@ -166,6 +167,64 @@ describe("ERC721Swapper", function () {
   });
 
   it("Claim NFT", async function () {
+
+    const addA = [nftContract.address, nftContract.address];
+    const idA = [2, 4];
+    const addB = [nftContract.address, nftContract.address, nftContract.address];
+    const idB = [6, 7, 9];
     
+    // Register
+    const txRegister = await exContract.connect(ownerA).register(ownerA.address, addA, idA, ownerB.address, addB, idB);
+    const reRegister = await txRegister.wait();
+    const [evRegister] = reRegister.events;   
+    let exId = evRegister.args.swapId.toNumber();
+ 
+    // Deposit A check states
+    const txDepositA = await exContract.connect(ownerA).deposit(exId, addA, idA);
+    const reDepositA = await txDepositA.wait();  
+    expect(reDepositA.events[reDepositA.events.length-1].args.state).to.equal(1); 
+    expect((await nftContract.ownerOf(idA[0]))).to.equal(exContract.address);
+
+    try{
+      // Claim should fail (B is not deposited)
+      const txClaimF = await exContract.connect(ownerA).claim(exId); 
+      console.log("Claim should fail");
+      expect(txClaimF).to.equal(false); 
+    }catch(e){ 
+      //console.log(e);
+    }  
+
+    // Deposit B check states
+    const txDepositB = await exContract.connect(ownerB).deposit(exId, addB, idB);
+    const reDepositB = await txDepositB.wait(); 
+    expect(reDepositB.events[reDepositB.events.length-1].args.state).to.equal(1); 
+    expect((await nftContract.ownerOf(idB[0]))).to.equal(exContract.address);
+
+    // State of swap should be 1 (Deposited)
+    const txGetSwap = await exContract.connect(ownerB).getSwap(exId);
+    expect(txGetSwap.StateA).to.equal(1);
+    expect(txGetSwap.StateB).to.equal(1);
+
+    try{
+      // Claim by non-participant should fail
+      const txClaimF = await exContract.connect(ownerC).claim(exId); 
+      console.log("Claim by non-participant should fail"); 
+    }catch(e){ 
+      //console.log(e);
+    }  
+
+    // Claim by participant should change state to 2 (Claimed)
+    const txClaim = await exContract.connect(ownerA).claim(exId); 
+    const reClaim = await txClaim.wait(); 
+    expect(reClaim.events[reClaim.events.length-1].args.state).to.equal(2); 
+
+    // proof that the NFTs changed ownership
+    for (let i = 0; i < idA.length; i++) { 
+      expect((await nftContract.ownerOf(idA[i]))).to.equal(ownerB.address);
+    }
+    for (let i = 0; i < idB.length; i++) { 
+      expect((await nftContract.ownerOf(idB[i]))).to.equal(ownerA.address);
+    }
+
   });
 });

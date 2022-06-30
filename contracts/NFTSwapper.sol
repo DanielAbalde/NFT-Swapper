@@ -154,22 +154,19 @@ abstract contract NFTSwapper is Context
     * @param swapId the swap identifier. 
     */
     function claim(uint256 swapId)
-                    existsSwapId(swapId) public returns (bool)
+                    existsSwapId(swapId)
+                    onlyParticipant(swapId, _msgSender())
+                    public
     {
         Swap memory e = _swaps[swapId]; 
-        require(e.StateA == SwapState.Deposited, "NFTSwapper: claim: state A is not supplied");
-        require(e.StateB == SwapState.Deposited, "NFTSwapper: claim: state B is not supplied");
-        if(e.StateA == SwapState.Deposited && e.StateB == SwapState.Deposited){ 
-            require(transferBatchOwnership(address(this), e.NFTContractB, e.tokenIdsB, e.OwnerA), "NFTSwapper: claim: contract to A failed");
-            e.StateA = SwapState.Claimed;
-            require(transferBatchOwnership(address(this), e.NFTContractA, e.tokenIdsA, e.OwnerB), "NFTSwapper: claim: contract to B failed");
-            e.StateB = SwapState.Claimed;
-            _swaps[swapId] = e;
-            emit SwapStateChanged(swapId, SwapState.Claimed);
-            return true; 
-        }else{
-            return false;
-        }
+        require(e.StateA == SwapState.Deposited, "NFTSwapper: claim: state A is not deposited");
+        require(e.StateB == SwapState.Deposited, "NFTSwapper: claim: state B is not deposited");
+        require(transferBatchOwnership(address(this), e.NFTContractB, e.tokenIdsB, e.OwnerA), "NFTSwapper: claim: contract to A failed");
+        e.StateA = SwapState.Claimed;
+        require(transferBatchOwnership(address(this), e.NFTContractA, e.tokenIdsA, e.OwnerB), "NFTSwapper: claim: contract to B failed");
+        e.StateB = SwapState.Claimed;
+        _swaps[swapId] = e;
+        emit SwapStateChanged(swapId, SwapState.Claimed);
     }
     /**
     * @dev Get the state of a swap.
