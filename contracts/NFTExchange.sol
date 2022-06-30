@@ -31,8 +31,10 @@ abstract contract NFTExchange is Context
  
     function ownerOf(address nft, uint256 tokenId) public view virtual returns (address);
 
-    function transferOwnership(address owner, address nftAddress, uint256 tokenId, address recipient) public virtual returns(bool);
-    function transferBatchOwnership(address owner, address[] memory nftAddresses, uint256[] memory tokenIds, address recipient) public virtual returns(bool);
+    function transferOwnership(address from, address nftAddress, uint256 tokenId, address to) public virtual returns(bool);
+
+    function transferBatchOwnership(address from, address[] memory nftAddresses, uint256[] memory tokenIds, address to) public virtual returns(bool);
+
 
     modifier onlyOwnerOf(address account, address[] memory nftAddresses, uint256[] memory tokenIds){
         require(nftAddresses.length == tokenIds.length, "NFTExchange: onlyOwnerOf: different length");
@@ -100,14 +102,18 @@ abstract contract NFTExchange is Context
         }
         emit ExchangeStateChanged(exchangeId, ExchangeState.Cancelled);
     }
-    /**
+    /**  
     * @dev Temporarily deposit the NFTs in this contract in a specific exchange.
     * @param exchangeId the exchange id. 
+    * @param nftAddresses the NFT contracts exchanged by participant .
+    * @param tokenIds the NFT token id exchanged by participant.
+    * Note that nftAddresses and tokenIds parameters are redundant since they are already stored on-chain, 
+    * but in this way the depositor has certainty that the exchange will be carried out with the expected NFTs.
     */
     function deposit(uint256 exchangeId, address[] memory nftAddresses, uint256[] memory tokenIds)      
                     onlyOwnerOf(_msgSender(), nftAddresses, tokenIds)
                     existsExchangeId(exchangeId)
-                    public returns (bool){
+                    public returns (bool deposited){
         Exchange memory e = _exchanges[exchangeId]; 
         if(e.OwnerA == _msgSender()){
             if(e.StateA == ExchangeState.Pending){ 
@@ -116,11 +122,11 @@ abstract contract NFTExchange is Context
                     require(e.NFTContractA[i] == nftAddresses[i], "NFTExchange: deposit: different NFT contract");
                     require(e.tokenIdsA[i] == tokenIds[i], "NFTExchange: deposit: different token id");
                 }
-                require(transferBatchOwnership(_msgSender(), nftAddresses, tokenIds, address(this)), "NFTExchange: deposit: transfer ownership failed");
+                require(transferBatchOwnership(e.OwnerA, e.NFTContractA, e.tokenIdsA, address(this)), "NFTExchange: deposit: transfer ownership failed");
                 e.StateA = ExchangeState.Deposited;
                 _exchanges[exchangeId] = e;
                 emit ExchangeStateChanged(exchangeId, ExchangeState.Deposited);
-                return true;
+                deposited = true;
             }
         }else if(e.OwnerB == _msgSender()){
             if(e.StateB == ExchangeState.Pending){ 
@@ -129,15 +135,16 @@ abstract contract NFTExchange is Context
                     require(e.NFTContractB[i] == nftAddresses[i], "NFTExchange: deposit: different NFT contract");
                     require(e.tokenIdsB[i] == tokenIds[i], "NFTExchange: deposit: different token id");
                 }
-                require(transferBatchOwnership(_msgSender(), nftAddresses, tokenIds, address(this)), "NFTExchange: deposit: operation failed");
+                require(transferBatchOwnership(e.OwnerB, e.NFTContractB, e.tokenIdsB, address(this)), "NFTExchange: deposit: operation failed");
                 e.StateB = ExchangeState.Deposited;
                 _exchanges[exchangeId] = e;
                 emit ExchangeStateChanged(exchangeId, ExchangeState.Deposited);
-                return true;
+                deposited = true;
             }
         }
-        return false;
+        deposited = false;
     }
+    
     /**
     * @dev Claims completion of an exchange. 
     * If both participants have deposit their NFTs, the first to claim trigger the exchange and the NFTs are sent to their new owners.
