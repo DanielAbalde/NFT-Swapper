@@ -23,9 +23,7 @@ contract ERC721Swapper is NFTSwapper, IERC721Receiver{
                                 public override returns(bool){
         require(nftAddresses.length == tokenIds.length, "ERC721Exchange: transferBatchOwnership: different length");
         for(uint256 i=0; i<nftAddresses.length; i++){
-            IERC721(nftAddresses[i]).safeTransferFrom(from, to, tokenIds[i]);
-            //(bool success, ) = nftAddresses[i].delegatecall(abi.encodeWithSignature("safeTransferFrom(address,address,uint256,bytes)", from, to, tokenIds[i],""));
-            //require(success, "ERC721Exchange: transferBatchOwnership: delegatecall failed");
+            IERC721(nftAddresses[i]).safeTransferFrom(from, to, tokenIds[i]); 
         } 
          return true;
     }

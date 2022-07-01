@@ -58,12 +58,12 @@ describe("ERC721Swapper", function () {
 
   it("Register a new swap and get its swap data", async function () {
     
-    const txRegister = await exContract.register(ownerA.address, [nftContract.address, nftContract.address], [1, 2], ownerB.address, [nftContract.address, nftContract.address], [5, 6]);
+    const txRegister = await exContract.register(ownerA.address, [nftContract.address, nftContract.address], [1, 2], ownerB.address, [nftContract.address, nftContract.address], [5, 6], true);
     const reRegister = await txRegister.wait();
     const [evRegister] = reRegister.events;  
     expect(evRegister.args.swapId.toNumber()).to.equal(1);
 
-    const txGetSwaps = await exContract.connect(ownerA.address).getSwaps();
+    const txGetSwaps = await exContract.getSwaps(ownerA.address);
     const exId = txGetSwaps[0].toNumber();
     expect(exId).to.equal(1);
 
@@ -78,7 +78,7 @@ describe("ERC721Swapper", function () {
 
   it("Cancel a swap", async function () {
 
-    const txRegister = await exContract.register(ownerA.address, [nftContract.address], [1], ownerB.address, [nftContract.address], [5]);
+    const txRegister = await exContract.register(ownerA.address, [nftContract.address], [1], ownerB.address, [nftContract.address], [5], true);
     const reRegister = await txRegister.wait();
     const [evRegister] = reRegister.events;   
     const exId = evRegister.args.swapId.toNumber();
@@ -108,7 +108,7 @@ describe("ERC721Swapper", function () {
     const idB = [8];
     
     // Register
-    const txRegister = await exContract.connect(ownerA).register(ownerA.address, addA, idA, ownerB.address, addB, idB);
+    const txRegister = await exContract.connect(ownerA).register(ownerA.address, addA, idA, ownerB.address, addB, idB, true);
     const reRegister = await txRegister.wait();
     const [evRegister] = reRegister.events;   
     let exId = evRegister.args.swapId.toNumber();
@@ -174,7 +174,7 @@ describe("ERC721Swapper", function () {
     const idB = [6, 7, 9];
     
     // Register
-    const txRegister = await exContract.connect(ownerA).register(ownerA.address, addA, idA, ownerB.address, addB, idB);
+    const txRegister = await exContract.connect(ownerA).register(ownerA.address, addA, idA, ownerB.address, addB, idB, true);
     const reRegister = await txRegister.wait();
     const [evRegister] = reRegister.events;   
     let exId = evRegister.args.swapId.toNumber();

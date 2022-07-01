@@ -20,7 +20,8 @@ abstract contract NFTSwapper is Context
     struct Swap{
         uint256 Id;
         SwapState StateA; address OwnerA; address[] NFTContractA; uint256[] tokenIdsA;
-        SwapState StateB; address OwnerB; address[] NFTContractB; uint256[] tokenIdsB;      
+        SwapState StateB; address OwnerB; address[] NFTContractB; uint256[] tokenIdsB;
+        bool Public;   
     }
  
     mapping(uint256=>Swap) private _swaps;
@@ -54,6 +55,10 @@ abstract contract NFTSwapper is Context
         require(_swaps[swapId].Id > 0, "NFTSwapper: swapId does not exist");
         _;
     }
+    modifier notCancelled(uint256 swapId){
+        require(_swaps[swapId].StateA != SwapState.Cancelled, "NFTSwapper: swap is cancelled");
+        _;
+    }
    
     // ############################  PUBLIC METHODS ############################
  
@@ -65,10 +70,12 @@ abstract contract NFTSwapper is Context
     * @param ownerB the address of participant B. 
     * @param nftAddressesB the NFT contracts swapd by participant B.
     * @param tokenIdsB the NFT token id swapd by participant B.
+    * @param public_ if true, the swap is publi and can be obtained from getSwap(uint256) method.
     * @return swapId the swap id. 
     */
     function register(address ownerA, address[] memory nftAddressesA, uint256[] memory tokenIdsA,
-                      address ownerB, address[] memory nftAddressesB, uint256[] memory tokenIdsB) 
+                      address ownerB, address[] memory nftAddressesB, uint256[] memory tokenIdsB,
+                      bool public_) 
                         onlyOwnerOf(ownerA, nftAddressesA, tokenIdsA) 
                         onlyOwnerOf(ownerB, nftAddressesB, tokenIdsB) 
                         public returns (uint256 swapId)
@@ -76,7 +83,7 @@ abstract contract NFTSwapper is Context
       require(ownerA != ownerB, "NFTSwapper: register: same owner");
         _idCounter.increment();
         swapId = _idCounter.current();
-        _swaps[swapId] = Swap(swapId, SwapState.Pending, ownerA, nftAddressesA, tokenIdsA, SwapState.Pending, ownerB, nftAddressesB, tokenIdsB);
+        _swaps[swapId] = Swap(swapId, SwapState.Pending, ownerA, nftAddressesA, tokenIdsA, SwapState.Pending, ownerB, nftAddressesB, tokenIdsB, public_);
         _members[ownerA].push(swapId);
         _members[ownerB].push(swapId);
         emit SwapStateChanged(swapId, SwapState.Pending);
@@ -118,6 +125,7 @@ abstract contract NFTSwapper is Context
     function deposit(uint256 swapId, address[] memory nftAddresses, uint256[] memory tokenIds)      
                     onlyOwnerOf(_msgSender(), nftAddresses, tokenIds)
                     existsSwapId(swapId)
+                    notCancelled(swapId)
                     public returns (bool deposited){
         Swap memory e = _swaps[swapId]; 
         if(e.OwnerA == _msgSender()){
@@ -156,6 +164,7 @@ abstract contract NFTSwapper is Context
     function claim(uint256 swapId)
                     existsSwapId(swapId)
                     onlyParticipant(swapId, _msgSender())
+                    notCancelled(swapId)
                     public
     {
         Swap memory e = _swaps[swapId]; 
@@ -191,15 +200,14 @@ abstract contract NFTSwapper is Context
     /**
     * @dev Get the swaps of the sender account. 
     */
-    function getSwaps() public view returns(uint256[] memory){
-        return _members[_msgSender()];
+    function getSwaps(address account) public view returns(uint256[] memory){
+        return _members[account];
     }
     /**
     * @dev Get a swap of the sender account. 
     */
-    function getSwap(uint256 swapId)
-          onlyParticipant(swapId, _msgSender())
-          public view returns(Swap memory){ 
+    function getSwap(uint256 swapId) public view returns(Swap memory){ 
+        require(_swaps[swapId].Public, "NFTSwapper: getSwap: swap is not public");
         return _swaps[swapId];
     }
 }
