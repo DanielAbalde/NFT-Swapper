@@ -7,8 +7,8 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/3.0.0-rc.5/web3.min.js"></script>
-    <script type="module" src="dapp.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="dapp.js"></script>
   </head>
   <body>
     <div class="container">
@@ -20,10 +20,10 @@
           </div>
         </a> 
         <div id="topNav" class="topCol">
-          <a class="topNavLink" href="#register">New Swap</a>
-          <a class="topNavLink" href="#mySwaps">My Swaps</a> 
-          <a class="topNavLink" href="#explore">Explore</a> 
-          <a class="topNavLink" href="#about">About</a>
+          <a class="topNavLink" href="?view=register">New Swap</a>
+          <a class="topNavLink" href="?view=profile">My Swaps</a> 
+          <a class="topNavLink" href="?view=explore">Explore</a> 
+          <a class="topNavLink" href="?view=about">About</a>
         </div> 
       </div>
       <div id="bottomRow" class="row">
@@ -52,20 +52,27 @@
             </form>
           </div>
         </div>
-      
         <div id="approve" class="step">
           <form action="" class="botCol">
+            <div class="formGroup">
+              <b class="formDescription formTitle">Approve as operator</b>
+              <p class="formDescription">The NFT-Swapper contract must be approved as an operator on the NFT contract by yourself in order to transfer your NFTs.</p>
+            </div>
             <div class="formGroup">
               <label for="approve" class="formLabel">NFT Contract:</label>
               <input type="text" id="approve" name="approve" placeholder="0x..." class="formInput"></input>
             </div>
             <br>
             <div class="formGroup" style="justify-content: center;">
-              <input type="submit" value="Approve">
+              <input type="submit" value="Approve as operator">
            </div>
           </form>
         </div>
         <div id="register" class="step">
+          <div class="formGroup">
+            <b class="formDescription formTitle">Register new swap</b>
+            <p class="formDescription">The NFT-Swapper contract must be approved as an operator on the NFT contract by yourself in order to transfer your NFTs.</p>
+          </div>
           <form action="" class="botCol">
             <div class="formGroup">
                 <label for="ownerA" class="formLabel">Owner A:</label>
@@ -93,7 +100,7 @@
             </div>
             <br>
             <div class="formGroup" style="justify-content: center;">
-                <input type="submit" value="Register New Swap">
+                <input type="submit" value="Register new swap">
             </div>
           </form>
         </div>

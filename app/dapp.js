@@ -1,25 +1,36 @@
 
-var url = new URL(window.location.href);
-var web3;
- 
 const contracts = { 
     Mumbai: {
-        ERC721: "0x68fE05bA6C9bd7d43FF255f4D90D8508a605dBfa", 
+        NFT:{
+            ERC721:{
+                contract: "0x68fE05bA6C9bd7d43FF255f4D90D8508a605dBfa",
+                abi: "./assets/Abi/ERC721.json",
+            }
+        },
         scanner: "mumbai.polygonscan.com",
-        endpoint: API_URL_MUMBAI
+        endpoint: process.env.API_URL_MUMBAI
     },
     Polygon: {
         ERC721: "0x68fE05bA6C9bd7d43FF255f4D90D8508a605dBfa", 
         ERC1155: "0x68fE05bA6C9bd7d43FF255f4D90D8508a605dBfa", 
         scanner: "polygonscan.com",
-        endpoint: API_URL_MATIC
+        endpoint: "https://polygon-mumbai.g.alchemy.com/v2/"
     }
 }
 
 window.onload = async function(){ 
     await startDApp(); 
     selectSwapperContract({id: "init"});
-
+    const url = new URL(window.location.href);
+    const view = url.searchParams.get("view") || "register";
+    document.getElementById("approve").style.display = "none";
+    document.getElementById("register").style.display = "none";
+    document.getElementById("deposit").style.display = "none";
+    document.getElementById("claim").style.display = "none";
+    if(view == "register"){
+        document.getElementById("approve").style.display = "block";
+        document.getElementById("register").style.display = "block";
+    }
 }
  
 async function connectButtonClicked(){
@@ -42,9 +53,19 @@ function refreshConnectStep(){
 }
  
 function selectSwapperContract(e){
-    const chain = document.getElementById('chains').value;
+    const chainElement = document.getElementById("chains");
+    const chain = chainElement.value;
     if(e.id == "init"){  
-
+        Array.from(chainElement).forEach((option) => {
+            chainElement.removeChild(option)
+        });
+        for (const key of Object.keys(contracts)) { 
+            var opt = document.createElement('option');
+            opt.value = key;
+            opt.innerHTML = key;
+            chainElement.appendChild(opt);
+        }
+        chainElement.value = chain;
         e.id = "chains";
     }
     const nftElement = document.getElementById('nfttype');
@@ -52,41 +73,22 @@ function selectSwapperContract(e){
         Array.from(nftElement).forEach((option) => {
             nftElement.removeChild(option)
         });
-        for (const key of Object.keys(contracts[chain])) {
-            if(key != 'scanner' && key != 'endpoint'){
-                var opt = document.createElement('option');
-                opt.value = key;
-                opt.innerHTML = key;
-                nftElement.appendChild(opt);
-            }
+        for (const key of Object.keys(contracts[chain].NFT)) {
+            var opt = document.createElement('option');
+            opt.value = key;
+            opt.innerHTML = key;
+            nftElement.appendChild(opt);
         }
     }  
     const scanner = contracts[chain].scanner;
-    const address = contracts[chain][nftElement.value];
+    const address = contracts[chain][nftElement.value].contract;
     const url = `https:/${scanner}/address/${address}#code`;
     document.getElementById("contractURL").href = url;
 
     web3 = new Web3(contracts[chain].endpoint);
+    console.log(web3);
 }
- 
-function getUrlValue(name, defaultValue){
-	var value = url.searchParams.get(name);
-	if(value){  
-    if (typeof defaultValue == "boolean") {
-			return parseBoolean(value);
-		}
-		else if (typeof defaultValue == "number") {
-			if(value.startsWith("0x"))
-				return parseInt(value);
-			return parseFloat(value);
-		}
-		return value;
-	}else{
-		return defaultValue;
-	}
-}
-
-
+  
 ethereum.on('accountsChanged', handleAccountsChanged);
  
 let ethWalletAvaliable;

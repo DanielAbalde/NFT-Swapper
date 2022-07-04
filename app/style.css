@@ -35,7 +35,9 @@ a:active {
   color: blue;
 }
 
-p { word-break: break-all }
+p { 
+  word-break: break-word; 
+}
 
 .container {
   display:flex;
@@ -137,6 +139,21 @@ p { word-break: break-all }
 
 .formLabel{ 
   padding-right: 10px;
+}
+
+.formTitle{ 
+  text-align: center;
+  padding-left: 20px; 
+  padding-right: 20px; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: min(1.4rem, 16px); 
+}
+.formDescription{
+  margin: 0px;
+  margin-bottom: 15px; 
+  font-size: min(1.2rem, 14px); 
 }
 
 .formInput{ 
