@@ -3,7 +3,7 @@ require('dotenv').config();
 var url = new URL(window.location.href);
 var web3 = new Web3(process.env.API_URL_MUMBAI);
  
-const contracts = {
+const contracts = { 
     Mumbai: {
         ERC721: "0x68fE05bA6C9bd7d43FF255f4D90D8508a605dBfa", 
         scanner: "mumbai.polygonscan.com",
