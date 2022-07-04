@@ -1,0 +1,160 @@
+*{
+  box-sizing: border-box;
+}
+html, body { 
+	background: rgb(50, 50, 50);
+	color: #fff;
+  padding: 0;
+  margin: 0; 
+} 
+
+body {
+	font-size: min(1.4rem, 16px);
+  font-family: 'Verdana';
+	text-rendering: optimizeLegibility;  
+  justify-content: center; 
+}
+
+/* unvisited link */
+a:link {
+  color: #fff;
+}
+
+/* visited link */
+a:visited {
+  color: rgb(200, 200, 200);
+}
+
+/* mouse over link */
+a:hover {
+  color: rgb(255, 0, 170);
+}
+
+/* selected link */
+a:active {
+  color: blue;
+}
+
+p { word-break: break-all }
+
+.container {
+  display:flex;
+  flex-direction: column;  
+  height: 100vh;
+  max-width: 900px;   
+	margin: auto;
+}
+ 
+.row{
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;  
+  max-width: 100%;
+  width: 100%;
+  
+}
+
+.column{
+  display: flex; 
+  flex-direction: column;  
+  width: 50%;
+}
+
+#topRow {   
+  flex-direction: row; 
+} 
+
+.topCol{       
+  font-size: min(3vw, 16px);
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;  
+}
+
+.botCol { 
+  height:100%;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;  
+}
+
+#bottomRow {  
+  /*flex-grow: 1*/
+  padding-top: min(5vw, 50px);
+} 
+ 
+#titleDiv{ 
+  justify-content: space-around;
+  padding-left: min(4vw, 50px);
+  padding-right: min(4vw, 50px);
+  padding-top: min(1.5vw, 16px);
+  padding-bottom: min(1.5vw, 16px);
+}
+
+#title{
+  font-size: min(5vw, 28px);
+  font-weight: bold;
+  text-align: center;
+  margin-top: min(1vw, 10px);
+  margin-bottom: 10px;
+}
+
+#titleLink {
+  all: unset;
+}
+ 
+#subtitle{ 
+  font-size:min(2vw, 12px);
+  text-align: center;
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+#topNav {
+  flex-grow: 1;
+  flex-direction: row;
+  padding: min(3vw, 50px); 
+}
+
+.topNavLink{
+  text-decoration: none;
+}
+ 
+.connectStep{
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.formGroup{
+  width: 100%;
+  margin-bottom: 5px; 
+  display: flex;
+}
+
+.formLabel{ 
+  padding-right: 10px;
+}
+
+.formInput{ 
+  flex-grow: 1;
+}
+
+.step{
+  width: 100%;
+  padding-bottom:min(4vw, 50px);
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;  
+}
+
+@media screen and (max-width: 950px) {
+  .step{
+    padding:min(4vw, 50px);
+  }
+}
+   

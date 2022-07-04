@@ -10,13 +10,13 @@ describe("Test721", function(){
     nftContract = await nftFactory.deploy();
     await nftContract.deployed();
 
-    for(let i = 1; i < 5; i++) { 
+    for(let i = 1; i <= 10; i++) { 
       const responseA = await nftContract.mint(ownerA.address);
       const receiptA = await responseA.wait();
       const [transferEventA] = receiptA.events; 
       expect(transferEventA.args.tokenId.toNumber()).to.equal(i);
     }
-    for(let i = 5; i < 10; i++) { 
+    for(let i = 11; i <= 20; i++) { 
       const responseB = await nftContract.mint(ownerB.address);
       const receiptB = await responseB.wait();
       const [transferEventB] = receiptB.events; 
@@ -28,6 +28,7 @@ describe("Test721", function(){
 describe("ERC721Swapper", function () {
   let exContract;
   let signer, ownerA, ownerB, ownerC;
+  const zeroAddress = '0x0000000000000000000000000000000000000000';
 
   it("Compile and approve nft contract", async function () {
     [signer, ownerA, ownerB, ownerC] = await ethers.getSigners();  
@@ -58,7 +59,12 @@ describe("ERC721Swapper", function () {
 
   it("Register a new swap and get its swap data", async function () {
     
-    const txRegister = await exContract.register(ownerA.address, [nftContract.address, nftContract.address], [1, 2], ownerB.address, [nftContract.address, nftContract.address], [5, 6], true);
+    const addA = [nftContract.address, nftContract.address];
+    const idA = [1, 2];
+    const addB = [nftContract.address, nftContract.address];
+    const idB = [11, 12];
+
+    const txRegister = await exContract.register(ownerA.address, addA, idA, ownerB.address, addB, idB, true);
     const reRegister = await txRegister.wait();
     const [evRegister] = reRegister.events;  
     expect(evRegister.args.swapId.toNumber()).to.equal(1);
@@ -70,15 +76,15 @@ describe("ERC721Swapper", function () {
     const txGetSwap = await exContract.connect(ownerA.address).getSwap(exId);
     expect(txGetSwap.OwnerA).to.equal(ownerA.address);
     expect(txGetSwap.NFTContractA[0]).to.equal(nftContract.address);
-    expect(txGetSwap.tokenIdsA[0].toNumber()).to.equal(1);
+    expect(txGetSwap.tokenIdsA[0].toNumber()).to.equal(idA[0]);
     expect(txGetSwap.OwnerB).to.equal(ownerB.address); 
     expect(txGetSwap.NFTContractB[0]).to.equal(nftContract.address);
-    expect(txGetSwap.tokenIdsB[0].toNumber()).to.equal(5); 
+    expect(txGetSwap.tokenIdsB[0].toNumber()).to.equal(idB[0]); 
   });
 
   it("Cancel a swap", async function () {
 
-    const txRegister = await exContract.register(ownerA.address, [nftContract.address], [1], ownerB.address, [nftContract.address], [5], true);
+    const txRegister = await exContract.register(ownerA.address, [nftContract.address], [3], ownerB.address, [nftContract.address], [13], true);
     const reRegister = await txRegister.wait();
     const [evRegister] = reRegister.events;   
     const exId = evRegister.args.swapId.toNumber();
@@ -99,13 +105,12 @@ describe("ERC721Swapper", function () {
     expect(txGetSwap.StateB).to.equal(3); 
   });
 
-  
   it("Deposit NFT", async function () {
  
     const addA = [nftContract.address];
-    const idA = [3];
+    const idA = [4];
     const addB = [nftContract.address];
-    const idB = [8];
+    const idB = [14];
     
     // Register
     const txRegister = await exContract.connect(ownerA).register(ownerA.address, addA, idA, ownerB.address, addB, idB, true);
@@ -126,7 +131,7 @@ describe("ERC721Swapper", function () {
 
     try{
       // Deposit other NFT should fail
-      const txDepositF = await exContract.connect(ownerB).deposit(exId, addB, [9]);
+      const txDepositF = await exContract.connect(ownerB).deposit(exId, addB, [18]);
       const reDepositF = await txDepositF.wait(); 
       console.log("Deposit other NFT should fail");
       expect(false).to.equal(true); 
@@ -169,9 +174,9 @@ describe("ERC721Swapper", function () {
   it("Claim NFT", async function () {
 
     const addA = [nftContract.address, nftContract.address];
-    const idA = [2, 4];
+    const idA = [5, 6];
     const addB = [nftContract.address, nftContract.address, nftContract.address];
-    const idB = [6, 7, 9];
+    const idB = [15, 16, 17];
     
     // Register
     const txRegister = await exContract.connect(ownerA).register(ownerA.address, addA, idA, ownerB.address, addB, idB, true);
@@ -225,6 +230,52 @@ describe("ERC721Swapper", function () {
     for (let i = 0; i < idB.length; i++) { 
       expect((await nftContract.ownerOf(idB[i]))).to.equal(ownerA.address);
     }
+
+  });
+
+  it("Register an open swap", async function () {
+      
+    const addA = [nftContract.address];
+    const idA = [7];
+    const addB = [nftContract.address, nftContract.address];
+    const idB = [18, 19];
+    
+    // Register
+    const txRegister = await exContract.connect(ownerA).register(ownerA.address, addA, idA, zeroAddress, addB, idB, false);
+    const reRegister = await txRegister.wait(); 
+    let exId = reRegister.events[reRegister.events.length-1].args.swapId.toNumber();
+
+    // Deposit A check states
+    const txDepositA = await exContract.connect(ownerA).deposit(exId, addA, idA);
+    const reDepositA = await txDepositA.wait();  
+    expect(reDepositA.events[reDepositA.events.length-1].args.state).to.equal(1); 
+    expect((await nftContract.ownerOf(idA[0]))).to.equal(exContract.address);
+ 
+    // Deposit B check states
+    const txDepositB = await exContract.connect(ownerB).deposit(exId, addB, idB);
+    const reDepositB = await txDepositB.wait(); 
+    expect(reDepositB.events[reDepositB.events.length-1].args.state).to.equal(1); 
+    expect((await nftContract.ownerOf(idB[0]))).to.equal(exContract.address);
+
+    // State of swap should be 1 (Deposited)
+    const txGetSwap = await exContract.connect(ownerB).getSwap(exId);
+    expect(txGetSwap.StateA).to.equal(1);
+    expect(txGetSwap.StateB).to.equal(1);
+   
+  });
+
+  it("Register a private swap", async function () {
+
+    const addA = [nftContract.address];
+    const idA = [8];
+    const addB = [nftContract.address];
+    const idB = [20];
+    
+    // Register
+    const txRegister = await exContract.connect(ownerA).register(ownerA.address, addA, idA, zeroAddress, addB, idB, false);
+    const reRegister = await txRegister.wait(); 
+    let exId = reRegister.events[reRegister.events.length-1].args.swapId.toNumber();
+
 
   });
 });
