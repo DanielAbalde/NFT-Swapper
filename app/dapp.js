@@ -1,25 +1,25 @@
-require('dotenv').config();
 
 var url = new URL(window.location.href);
-var web3 = new Web3(process.env.API_URL_MUMBAI);
+var web3;
  
 const contracts = { 
     Mumbai: {
         ERC721: "0x68fE05bA6C9bd7d43FF255f4D90D8508a605dBfa", 
         scanner: "mumbai.polygonscan.com",
-        endpoint: process.env.API_URL_MUMBAI
+        endpoint: API_URL_MUMBAI
     },
     Polygon: {
         ERC721: "0x68fE05bA6C9bd7d43FF255f4D90D8508a605dBfa", 
         ERC1155: "0x68fE05bA6C9bd7d43FF255f4D90D8508a605dBfa", 
         scanner: "polygonscan.com",
-        endpoint: process.env.API_URL_MATIC
+        endpoint: API_URL_MATIC
     }
 }
 
 window.onload = async function(){ 
     await startDApp(); 
     selectSwapperContract({id: "init"});
+
 }
  
 async function connectButtonClicked(){
@@ -65,6 +65,8 @@ function selectSwapperContract(e){
     const address = contracts[chain][nftElement.value];
     const url = `https:/${scanner}/address/${address}#code`;
     document.getElementById("contractURL").href = url;
+
+    web3 = new Web3(contracts[chain].endpoint);
 }
  
 function getUrlValue(name, defaultValue){
