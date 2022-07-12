@@ -7,3 +7,6 @@ typechain
 #Hardhat files
 cache
 artifacts
+
+LSP8Swapper.sol
+ERC1155Swapper.sol

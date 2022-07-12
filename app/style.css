@@ -27,7 +27,7 @@ a:visited {
 
 /* mouse over link */
 a:hover {
-  color: rgb(255, 0, 170);
+  color: rgb(255, 0, 175);
 }
 
 /* selected link */
@@ -140,21 +140,23 @@ p {
 .formLabel{ 
   padding-right: 10px;
 }
-
-.formTitle{ 
-  text-align: center;
-  padding-left: 20px; 
-  padding-right: 20px; 
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: min(1.4rem, 16px); 
-}
 .formDescription{
   margin: 0px;
   margin-bottom: 15px; 
   font-size: min(1.2rem, 14px); 
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  flex-direction: column;
 }
+.formTitle{ 
+  text-align: center;
+  padding-left: 0px; 
+  padding-right: 20px; 
+  display: flex; 
+  font-size: min(1.4rem, 18px); 
+}
+
 
 .formInput{ 
   flex-grow: 1;

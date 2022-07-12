@@ -32,7 +32,7 @@ abstract contract NFTSwapper is Context
 
     // ############################  ABSTRACT METHODS ############################
  
-    function ownerOf(address nft, uint256 tokenId) public view virtual returns (address);
+    function isOwnerOf(address nft, uint256 tokenId, address account) public view virtual returns (bool);
 
     function transferOwnership(address from, address nftAddress, uint256 tokenId, address to) public virtual returns(bool);
 
@@ -44,7 +44,7 @@ abstract contract NFTSwapper is Context
         require(nftAddresses.length == tokenIds.length, "NFTSwapper: onlyOwnerOf: different length");
         if(account != address(0)){
             for(uint256 i=0; i<nftAddresses.length; i++){
-                require(ownerOf(nftAddresses[i], tokenIds[i]) == account, "NFTSwapper: onlyOwnerOf: not the owner");
+                require(isOwnerOf(nftAddresses[i], tokenIds[i], account), "NFTSwapper: onlyOwnerOf: not the owner");
             }
         }
         _; 
@@ -105,12 +105,12 @@ abstract contract NFTSwapper is Context
         _swaps[swapId] = e;
         address thisContract = address(this);
         for(uint256 i=0; i<e.NFTContractA.length; i++){
-            if(ownerOf(e.NFTContractA[i], e.tokenIdsA[i]) == thisContract){
+            if(isOwnerOf(e.NFTContractA[i], e.tokenIdsA[i], thisContract)){
                 transferOwnership(thisContract, e.NFTContractA[i], e.tokenIdsA[i], e.OwnerA);
             }
         }
         for(uint256 i=0; i<e.NFTContractB.length; i++){
-            if(ownerOf(e.NFTContractB[i], e.tokenIdsB[i]) == thisContract){
+            if(isOwnerOf(e.NFTContractB[i], e.tokenIdsB[i], thisContract)){
                 transferOwnership(thisContract, e.NFTContractB[i], e.tokenIdsB[i], e.OwnerB);
             }
         }

@@ -9,9 +9,9 @@ contract ERC721Swapper is NFTSwapper, IERC721Receiver{
   
     constructor() NFTSwapper() {}
 
-    function ownerOf(address nft, uint256 tokenId) 
-                        public view override returns (address){
-        return IERC721(nft).ownerOf(tokenId);
+    function isOwnerOf(address nft, uint256 tokenId, address account) 
+                        public view override returns (bool){
+        return IERC721(nft).ownerOf(tokenId) == account;
     }
 
     function transferOwnership(address from, address nftAddress, uint256 tokenId, address to)

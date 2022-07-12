@@ -18,6 +18,7 @@
     "hardhat": "^2.9.3"
   },
   "dependencies": {
+    "@lukso/lsp-smart-contracts": "^0.6.1",
     "dotenv": "^16.0.1",
     "hardhat-gas-reporter": "^1.0.8",
     "web3": "^1.7.4"

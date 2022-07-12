@@ -7,8 +7,9 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
-    <script src="dapp.js"></script>
+    <!--<script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>-->
+    <script type="text/javascript"  integrity="sha384-qU3nvpskWirnJuSLmQWFfAFKbiN5+JKbAEEoTOcPYJu3s1xCe66b66sUER3x5wVF" crossorigin="anonymous" src="https://cdn-cors.ethers.io/lib/ethers-5.6.9.umd.min.js"> </script>
+    <script src="dappV2.js"></script>
   </head>
   <body>
     <div class="container">
@@ -28,16 +29,12 @@
       </div>
       <div id="bottomRow" class="row">
         <div id="connect" class="step row">
-          <div class="connectStep column">
-            <button id="connectButton" onclick="connectButtonClicked()">Connect</button>
-            <p id="connectLabel">No address</p>
-          </div> 
           <div id="chain" class="connectStep column">
             <form action="" class="botCol">
               <div class="formGroup">
                 <label for="chains" class="formLabel">Chain:</label>
                 <select id="chains" name="chains" class="formInput" onchange="selectSwapperContract(this)">
-                  <option value="Polygon">Polygon</option> 
+                  <option value="Mumbai">Mumbai</option> 
                 </select>
               </div>
               <div class="formGroup">
@@ -51,16 +48,21 @@
               </div> 
             </form>
           </div>
+          <div class="connectStep column">
+            <button id="connectButton" onclick="connectButtonClicked()">Connect</button>
+            <p id="connectLabel" ondblclick="copyText('connectLabel')" title="Double click to copy">No address</p>
+          </div> 
+        
         </div>
         <div id="approve" class="step">
-          <form action="" class="botCol">
+          <form action="javascript:approveButtonClicked(approveField.value)" class="botCol">
             <div class="formGroup">
-              <b class="formDescription formTitle">Approve as operator</b>
+              <b class="formDescription formTitle">Approve to transfer</b>
               <p class="formDescription">The NFT-Swapper contract must be approved as an operator on the NFT contract by yourself in order to transfer your NFTs.</p>
             </div>
             <div class="formGroup">
-              <label for="approve" class="formLabel">NFT Contract:</label>
-              <input type="text" id="approve" name="approve" placeholder="0x..." class="formInput"></input>
+              <label for="approve" class="formLabel">NFT Contract(s):</label>
+              <input type="text" id="approveField" name="approve" placeholder="0x..." class="formInput" maxlength="42" minlength="42" title="Approve one by one all the NFT addresses that you own used for the swap." required></input>
             </div>
             <br>
             <div class="formGroup" style="justify-content: center;">
@@ -71,33 +73,38 @@
         <div id="register" class="step">
           <div class="formGroup">
             <b class="formDescription formTitle">Register new swap</b>
-            <p class="formDescription">The NFT-Swapper contract must be approved as an operator on the NFT contract by yourself in order to transfer your NFTs.</p>
+            <p class="formDescription">Create a new swap agreement by specifying an NFT contract address for each token ID. You can create an open swap agreement if you do not specify Owner B. Copy the Swap Id once completed.</p>
           </div>
-          <form action="" class="botCol">
+          <form action="javascript:registerButtonClicked()" class="botCol">
             <div class="formGroup">
                 <label for="ownerA" class="formLabel">Owner A:</label>
-                <input type="text" id="ownerA" name="ownerA" placeholder="0x..." class="formInput"></input>
+                <input type="text" id="ownerA" name="ownerA" placeholder="0x..." class="formInput"  title="The owner of the Token Ids A on NFT Contract A" required></input>
             </div>
             <div class="formGroup">
                 <label for="nftAddressesA" class="formLabel">NFT Contract A:</label>
-                <input type="text" id="nftAddressesA" name="nftAddressesA" placeholder="0x..." class="formInput">
+                <input type="text" id="nftAddressesA" name="nftAddressesA" placeholder="0x..." class="formInput" title="The NFT contract addresses of the Token Ids A to swap. Separate by commas if you want to exchange multiple NFTs. Must be the same amount as Token Ids A." multiple required>
             </div>
             <div class="formGroup">
                 <label for="tokensIdsA" class="formLabel">Token Ids A:</label>
-                <input type="text" id="tokensIdsA" name="tokensIdsA" placeholder="0" class="formInput">
+                <input type="text" id="tokensIdsA" name="tokensIdsA" placeholder="0" class="formInput" title="The Token ID of each NFT Contract A to swap. Separate by commas if you want to exchange multiple NFTs. Must be the same amount as NFT Contract A." multiple required>
             </div><br>
             <div class="formGroup">
                 <label for="ownerB" class="formLabel">Owner B:</label>
-                <input type="text" id="ownerB" name="ownerB" placeholder="0x..." class="formInput">
+                <input type="text" id="ownerB" name="ownerB" placeholder="0x..." class="formInput" title="The owner of the Token Ids B on NFT Contract B. Leave it empty to accept any owner as an open swap.">
             </div>
             <div class="formGroup">
                 <label for="nftAddressesB" class="formLabel">NFT Contract B:</label>
-                <input type="text" id="nftAddressesB" name="nftAddressesB" placeholder="0x..." class="formInput">
+                <input type="text" id="nftAddressesB" name="nftAddressesB" placeholder="0x..." class="formInput" title="The NFT contract addresses of the Token Ids B to swap. Separate by commas if you want to exchange multiple NFTs. Must be the same amount as Token Ids B."multiple required>
             </div>
             <div class="formGroup">
-                <label for="tokensIdsB" class="formLabel">Token Ids B:</label>
-                <input type="text" id="tokensIdsB" name="tokensIdsB" placeholder="0" class="formInput">
-            </div>
+              <label for="tokensIdsB" class="formLabel">Token Ids B:</label>
+              <input type="text" id="tokensIdsB" name="tokensIdsB" placeholder="0" class="formInput" title="The Token ID of each NFT Contract B to swap. Separate by commas if you want to exchange multiple NFTs. Must be the same amount as NFT Contract B."multiple required>
+          </div>
+          <br> 
+          <div class="formGroup">
+            <label for="publicSwap" class="formLabel">Public:</label>
+            <input type="checkbox" id="publicSwap" name="publicSwap" checked ="True" class="formInput" title="Uncheck to keep this swap only accesible by owner A and owner B, otherwise is public and can be view by everyone">
+        </div>
             <br>
             <div class="formGroup" style="justify-content: center;">
                 <input type="submit" value="Register new swap">
