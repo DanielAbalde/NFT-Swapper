@@ -9,34 +9,41 @@ html, body {
 } 
 
 body {
-	font-size: min(1.4rem, 16px);
+	font-size: min(1.2rem, 16px);
   font-family: 'Verdana';
 	text-rendering: optimizeLegibility;  
   justify-content: center; 
 }
-
-/* unvisited link */
+ 
 a:link {
   color: #fff;
 }
-
-/* visited link */
+ 
 a:visited {
   color: rgb(200, 200, 200);
 }
-
-/* mouse over link */
+ 
 a:hover {
   color: rgb(255, 0, 175);
 }
-
-/* selected link */
+ 
 a:active {
-  color: blue;
+  color: rgb(0, 255, 255);
 }
 
-p { 
+p, label, a { 
   word-break: break-word; 
+  font-size: min(0.9rem, 16px);
+}
+
+select, button {   
+  cursor: pointer;
+}
+ 
+img{
+  max-width:min(200px, 100%);
+  max-height:min(200px, 100%);
+  border: #fff solid 1px;
 }
 
 .container {
@@ -133,13 +140,25 @@ p {
 
 .formGroup{
   width: 100%;
-  margin-bottom: 5px; 
+  margin-bottom: 3px;  
   display: flex;
 }
 
-.formLabel{ 
-  padding-right: 10px;
+.formGroupButton{
+  justify-content: center;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center; 
 }
+
+.formLabel{  
+  padding-right: 10px; 
+}
+.formLabel:empty
+{
+    display:none;
+}
+
 .formDescription{
   margin: 0px;
   margin-bottom: 15px; 
@@ -157,9 +176,8 @@ p {
   font-size: min(1.4rem, 18px); 
 }
 
-
 .formInput{ 
-  flex-grow: 1;
+  flex-grow: 1; 
 }
 
 .step{
@@ -174,6 +192,118 @@ p {
 @media screen and (max-width: 950px) {
   .step{
     padding:min(4vw, 50px);
-  }
+  } 
 }
-   
+ 
+.swapCard{ 
+  width: 100%;
+  min-height: 100px;
+  padding: min(1.1vw, 15px);
+  margin-top: min(2.4vw, 30px);
+  border: 1px solid rgb(255, 255, 255);
+  border-radius: 10px;  
+}
+
+.swapFilter{ 
+  display: flex;
+  flex-direction: row;
+  justify-content: center; 
+}
+.swapFilter select{
+  max-width: 10%; 
+}
+ 
+
+.swapCardId{
+  text-align: center;
+  font-size: 110%;
+  margin: 0px;
+  margin-bottom: 15px;
+}
+
+.swapCardGroup{ 
+  width: 100%;
+  height: 100%;
+  display: flex; 
+  flex-direction: row; 
+  justify-content: space-around;
+}
+
+.swapCardGroupSeparator{   
+  width: 1px;  
+  background: #fff;
+  display: flex; 
+  flex-direction: column;
+}
+
+.swapCardGroupColumn{
+  width: 50%;  
+  display: flex; 
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 10px 0px 10px;
+}
+.swapCardGroupColumnDiv{
+  width: 100%; 
+  display: flex;
+  flex-direction: column; 
+  justify-content: space-around;
+  align-items: center;
+}
+
+.swapCardGroupColumnTop{ 
+  margin: 5px;
+  margin-bottom: 10px; 
+  border-bottom: #fff solid 1px;
+  justify-content: center;
+}
+
+.swapCardGroupColumnBottom{
+  display: flex;
+  flex-direction: row;  
+  margin-top: 10px; 
+  padding: 10px; 
+  padding-top:16px;
+  border-top: #fff solid 1px;
+}
+
+
+.swapCardToken{
+  width: 100%;
+  height: 100%; 
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.swapCardTokenText{ 
+  margin: 5px;
+  width: 100%; 
+  text-align: center;
+  text-decoration: none;
+}
+ 
+.pagination{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+  text-decoration: none;
+}
+
+.pagination a { 
+  padding: 5px;
+  margin: 5px; 
+  text-decoration: none;
+  font-size: min(1.2rem, 14px);
+}
+
+.emoji{
+  font-style: normal;
+}

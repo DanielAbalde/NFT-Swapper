@@ -3,6 +3,7 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "hardhat/console.sol";
 
 /**
  * @title NFTSwapper
@@ -15,17 +16,16 @@ abstract contract NFTSwapper is Context
     using Counters for Counters.Counter;  
 
     enum SwapState{ Pending, Deposited, Claimed, Cancelled }
-    event SwapStateChanged(uint256 swapId, SwapState state);
+    event SwapStateChanged(uint256 indexed swapId, SwapState indexed state);
 
     struct Swap{
         uint256 Id;
-        SwapState StateA; address OwnerA; address[] NFTContractA; uint256[] tokenIdsA;
-        SwapState StateB; address OwnerB; address[] NFTContractB; uint256[] tokenIdsB;
+        SwapState StateA; address OwnerA; address[] NFTContractA; uint256[] TokenIdsA;
+        SwapState StateB; address OwnerB; address[] NFTContractB; uint256[] TokenIdsB;
         bool Public;   
     }
  
     mapping(uint256=>Swap) private _swaps;
-    mapping(address=>uint256[]) private _members; 
     Counters.Counter private _idCounter; 
 
     constructor() {}
@@ -78,17 +78,15 @@ abstract contract NFTSwapper is Context
     function register(address ownerA, address[] memory nftAddressesA, uint256[] memory tokenIdsA,
                       address ownerB, address[] memory nftAddressesB, uint256[] memory tokenIdsB,
                       bool public_) 
-                        onlyOwnerOf(ownerA, nftAddressesA, tokenIdsA) 
-                        onlyOwnerOf(ownerB, nftAddressesB, tokenIdsB) 
+                        /*onlyOwnerOf(ownerA, nftAddressesA, tokenIdsA)
+                        onlyOwnerOf(ownerB, nftAddressesB, tokenIdsB)  */
                         public virtual returns (uint256 swapId)
     { 
         //require(ownerA != ownerB, "NFTSwapper: register: same owner");
         _idCounter.increment();
         swapId = _idCounter.current();
         _swaps[swapId] = Swap(swapId, SwapState.Pending, ownerA, nftAddressesA, tokenIdsA, SwapState.Pending, ownerB, nftAddressesB, tokenIdsB, public_);
-        _members[ownerA].push(swapId);
-        _members[ownerB].push(swapId);
-        emit SwapStateChanged(swapId, SwapState.Pending);
+        emit SwapStateChanged(swapId, SwapState.Pending); 
         return swapId;
     }  
     /**
@@ -105,13 +103,13 @@ abstract contract NFTSwapper is Context
         _swaps[swapId] = e;
         address thisContract = address(this);
         for(uint256 i=0; i<e.NFTContractA.length; i++){
-            if(isOwnerOf(e.NFTContractA[i], e.tokenIdsA[i], thisContract)){
-                transferOwnership(thisContract, e.NFTContractA[i], e.tokenIdsA[i], e.OwnerA);
+            if(isOwnerOf(e.NFTContractA[i], e.TokenIdsA[i], thisContract)){
+                transferOwnership(thisContract, e.NFTContractA[i], e.TokenIdsA[i], e.OwnerA);
             }
         }
         for(uint256 i=0; i<e.NFTContractB.length; i++){
-            if(isOwnerOf(e.NFTContractB[i], e.tokenIdsB[i], thisContract)){
-                transferOwnership(thisContract, e.NFTContractB[i], e.tokenIdsB[i], e.OwnerB);
+            if(isOwnerOf(e.NFTContractB[i], e.TokenIdsB[i], thisContract)){
+                transferOwnership(thisContract, e.NFTContractB[i], e.TokenIdsB[i], e.OwnerB);
             }
         }
         emit SwapStateChanged(swapId, SwapState.Cancelled);
@@ -122,7 +120,7 @@ abstract contract NFTSwapper is Context
     * @param nftAddresses the NFT contracts swapd by participant .
     * @param tokenIds the NFT token id swapd by participant.
     * Note that nftAddresses and tokenIds parameters are redundant since they are already stored on-chain, 
-    * but in this way the depositor has certainty that the swap will be carried out with the expected NFTs.
+    * but this way the depositor verifies that the swapId is as expected (at least on his side of the deal).
     */
     function deposit(uint256 swapId, address[] memory nftAddresses, uint256[] memory tokenIds)      
                     onlyOwnerOf(_msgSender(), nftAddresses, tokenIds)
@@ -135,9 +133,9 @@ abstract contract NFTSwapper is Context
             require(e.NFTContractA.length == nftAddresses.length, "NFTSwapper: deposit: different length");
             for (uint256 i=0; i<e.NFTContractA.length; i++){
                 require(e.NFTContractA[i] == nftAddresses[i], "NFTSwapper: deposit: different NFT contract");
-                require(e.tokenIdsA[i] == tokenIds[i], "NFTSwapper: deposit: different token id");
+                require(e.TokenIdsA[i] == tokenIds[i], "NFTSwapper: deposit: different token id");
             }
-            require(transferBatchOwnership(_msgSender(), e.NFTContractA, e.tokenIdsA, address(this)), "NFTSwapper: deposit: transfer ownership failed");
+            require(transferBatchOwnership(_msgSender(), e.NFTContractA, e.TokenIdsA, address(this)), "NFTSwapper: deposit: transfer ownership failed");
             e.StateA = SwapState.Deposited;
             _swaps[swapId] = e;
             emit SwapStateChanged(swapId, SwapState.Deposited);
@@ -147,9 +145,9 @@ abstract contract NFTSwapper is Context
             require(e.NFTContractB.length == nftAddresses.length, "NFTSwapper: deposit: different length");
             for (uint256 i=0; i<e.NFTContractB.length; i++){
                 require(e.NFTContractB[i] == nftAddresses[i], "NFTSwapper: deposit: different NFT contract");
-                require(e.tokenIdsB[i] == tokenIds[i], "NFTSwapper: deposit: different token id");
+                require(e.TokenIdsB[i] == tokenIds[i], "NFTSwapper: deposit: different token id");
             }
-            require(transferBatchOwnership(_msgSender(), e.NFTContractB, e.tokenIdsB, address(this)), "NFTSwapper: deposit: operation failed");
+            require(transferBatchOwnership(_msgSender(), e.NFTContractB, e.TokenIdsB, address(this)), "NFTSwapper: deposit: operation failed");
             e.StateB = SwapState.Deposited;
             if(e.OwnerB == address(0)){
                 e.OwnerB = _msgSender();
@@ -175,9 +173,9 @@ abstract contract NFTSwapper is Context
         Swap memory e = _swaps[swapId]; 
         require(e.StateA == SwapState.Deposited, "NFTSwapper: claim: state A is not deposited");
         require(e.StateB == SwapState.Deposited, "NFTSwapper: claim: state B is not deposited");
-        require(transferBatchOwnership(address(this), e.NFTContractB, e.tokenIdsB, e.OwnerA), "NFTSwapper: claim: contract to A failed");
+        require(transferBatchOwnership(address(this), e.NFTContractB, e.TokenIdsB, e.OwnerA), "NFTSwapper: claim: contract to A failed");
         e.StateA = SwapState.Claimed;
-        require(transferBatchOwnership(address(this), e.NFTContractA, e.tokenIdsA, e.OwnerB), "NFTSwapper: claim: contract to B failed");
+        require(transferBatchOwnership(address(this), e.NFTContractA, e.TokenIdsA, e.OwnerB), "NFTSwapper: claim: contract to B failed");
         e.StateB = SwapState.Claimed;
         _swaps[swapId] = e;
         emit SwapStateChanged(swapId, SwapState.Claimed);
@@ -207,14 +205,9 @@ abstract contract NFTSwapper is Context
     */
     function getSwap(uint256 swapId) public view virtual returns(Swap memory){ 
         Swap memory e = _swaps[swapId];
+        require(e.Id > 0, "NFTSwapper: getSwap: swapId is not valid");
         require(e.Public || _msgSender() == e.OwnerA || _msgSender() == e.OwnerB, "NFTSwapper: getSwap: swap is not public");
         return e;
-    }
-    /**
-    * @dev Get the swaps of the sender account. 
-    */
-    function getSwaps(address account) public view virtual returns(uint256[] memory){
-        return _members[account];
     }
     function getSwapCount() public view virtual returns(uint256){
         return _idCounter.current();
