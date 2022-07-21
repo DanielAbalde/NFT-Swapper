@@ -799,6 +799,7 @@ function displayLoading(show){
   loadE.style.zIndex = waiting ? 99 : -1;
   loadE.style.opacity = waiting ? 1 : 0;
   loadE.style.display = waiting ? "block" : "none";
+  document.getElementsByName("body").style.overflow = waiting ? "hidden" : "auto";
 }
 
 // ##########################
