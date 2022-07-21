@@ -20,7 +20,7 @@ a:link {
 }
  
 a:visited {
-  color: rgb(200, 200, 200);
+  color: #fff;
 }
  
 a:hover {
@@ -52,6 +52,7 @@ img{
   height: 100vh;
   max-width: 900px;   
 	margin: auto;
+  text-align: center;
 }
  
 .row{
@@ -307,3 +308,10 @@ img{
 .emoji{
   font-style: normal;
 }
+ 
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+ 

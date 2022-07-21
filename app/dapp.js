@@ -1,5 +1,5 @@
 
-let debug = false;
+let debug = true;
 
 const contracts = { 
   Mumbai: {
@@ -334,7 +334,8 @@ const contracts = {
               abiNFT: [
                 "function setApprovalForAll(address _operator, bool _approved) external", 
                 "function isApprovedForAll(address _owner, address _operator) external view returns (bool)",
-                "function tokenURI(uint256 tokenId) external view returns (string memory)"
+                "function tokenURI(uint256 tokenId) external view returns (string memory)",
+                "function name() external view returns (string memory)"
               ]
           }
       },
@@ -359,10 +360,11 @@ const contracts = {
   }
 }
 
-let provider, signer, signerAddress, connected, networkId, scanner, swapperAddress, swapperContract, contractURL, nftAbi, swapperAbi, waiting;
+let provider, signer, signerAddress, connected, networkId, scanner, swapperAddress, contractURL, nftAbi, swapperAbi;
+let swapperContract = undefined;
+let waiting = false;
 
 window.onload = async function(){ 
-  waiting = false;
 
   if(window.ethereum){
     provider = new ethers.providers.Web3Provider(window.ethereum, "any");
@@ -381,28 +383,32 @@ window.onload = async function(){
         switchNetwork();
       }
       refreshConnectButton(); 
+      const {name} = await provider.getNetwork();
+      console.log(`Connected ${signerAddress} on ${name}`);
     } else {
-        // metamask is not connected
+      console.log("Not connected");
     }
   });
 
-  selectSwapperContract({id: "init"});
+  await selectSwapperContract({id: "init"});
 
 
-  const url = new URL(window.location.href);
-  const view = url.searchParams.get("view") || "register";
+  document.getElementById("connectToAccess").innerHTML = connected ? "" : "Connect to access. 🔑";
   document.getElementById("approve").style.display = "none";
   document.getElementById("register").style.display = "none";
   document.getElementById("profile").style.display = "none";
-  if(view == "register"){
+  if(connected){ 
+    const url = new URL(window.location.href);
+    const view = url.searchParams.get("view") || "register";
+    if(view == "register"){
       document.getElementById("approve").style.display = "block";
       document.getElementById("register").style.display = "block";
-  }else if(view == "profile"){
-    document.getElementById("profile").style.display = "block";
-    displayProfile(false);
+    }else if(view == "profile"){
+      document.getElementById("profile").style.display = "block";
+      displayProfile();
+    } 
   }
-
-
+ 
   if(debug){
     const sample = 2;
     switch(sample){
@@ -438,7 +444,7 @@ window.onload = async function(){
   }
 
 }
-
+ 
 async function selectSwapperContract(e){
   const chainElement = document.getElementById("chains");
   const chain = chainElement.value;
@@ -476,13 +482,16 @@ async function selectSwapperContract(e){
   
   document.getElementById("contractURL").href = contractURL;
 
+  if(e.id === "init")
   await switchNetwork(); 
  
 }
 
-async function switchNetwork(){
+async function switchNetwork(){ 
   if(provider){
-    const { chainId } = await provider.getNetwork()
+    if(networkId === undefined)
+      networkId = contracts[document.getElementById("chains").value].id;
+    const { chainId } = await provider.getNetwork();
     if(networkId !== chainId){  
       try { 
         await ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: `0x${Number(networkId).toString(16)}` }], });
@@ -501,11 +510,13 @@ async function switchNetwork(){
 }
 
 function getSwapperContract(){
-  if(swapperContract)
+  if(swapperContract !== undefined)
     return swapperContract;
 
   swapperContract = new ethers.Contract(swapperAddress, swapperAbi, signer);
-  swapperContract.on("SwapStateChanged", OnSwapStateChanged);
+  if(swapperContract !== undefined){
+    swapperContract.on("SwapStateChanged", OnSwapStateChanged);
+  } 
   return swapperContract;
 }
 
@@ -526,7 +537,7 @@ async function OnSwapStateChanged(swapId, state){
       label.innerHTML = `Your swap ID is: <span style="font-size:200%;">${swapId}</span>.`;
       label.scrollIntoView();
     }else if(swap.StateA === 2 && swap.StateB === 2){
-      alert("🎉 Exchange successfully completed 🎉");
+      alert("🎉 Exchange successfully completed! 🎉");
     }
   }
 }
@@ -554,6 +565,7 @@ async function connectButtonClicked(){
     document.getElementById("connectButton").disabled = true;
     document.getElementById("connectLabel").innerHTML = "Please install MetaMask";
   } 
+
 }
 
 function refreshConnectButton(){
@@ -732,10 +744,11 @@ async function cancelSwapButtonClicked(e){
   e.target.disabled = true;
   e.target.innerHTML = "Cancelling...";
 
-  try{
-    const cancelTx = await getSwapperContract().cancel(swapId);
+  try{  
+    const cancelTx = await getSwapperContract().cancel(swapId); console.log("OJ");
     displayLoading(true);
     const cancelRc = await cancelTx.wait();
+    console.log(cancelRc);
   }catch(error){
     alertError(error);
   }
@@ -795,78 +808,93 @@ async function refreshSwapCard(swapId){
 
 function displayLoading(show){
   waiting = show === undefined ? (waiting ? false : true) : show;
-  const loadE = document.getElementById("loading");
-  loadE.style.zIndex = waiting ? 99 : -1;
+  const loadE = document.getElementById("loadingSplash");
+  loadE.style.zIndex = waiting ? 999 : -1;
   loadE.style.opacity = waiting ? 1 : 0;
-  loadE.style.display = waiting ? "block" : "none";
-  document.getElementsByName("body").style.overflow = waiting ? "hidden" : "auto";
+  loadE.style.display = waiting ? "block" : "none"; 
+  loadE.style.top =  window.scrollY + "px"; 
+  document.body.style.overflow = waiting ? "hidden" : "auto";
 }
 
 // ##########################
  
 
 async function displayProfile(){
-  const profile = document.getElementById("profile");
-  if(connected){ 
-    const count = (await getSwapperContract().getSwapCount()).toNumber();
-    const swaps = [];
-    const filter = document.getElementById("profileFilter").value;
-
-    for(var i=1; i<=count; i++){
-      const swap = await getSwapperContract().getSwap(i);
-      if(swap.OwnerA !== signerAddress && swap.OwnerB !== signerAddress)
-        continue;
-
-      if(filter === "All"){
-        swaps.push(swap);
-      }else{
-        if(translateState(getState(swap)) === filter){
-          swaps.push(swap);
+  try{
+    const profile = document.getElementById("profile");
+    const swapperContract = getSwapperContract();
+    if(connected && swapperContract !== undefined){  
+      const swaps = [];
+      try{
+        const swapCount = await swapperContract.getSwapCount(); 
+        const count = swapCount.toNumber();  
+        const filter = document.getElementById("profileFilter").value;
+        for(var i=1; i<=count; i++){ 
+          try{
+            const swap = await swapperContract.getSwap(i); 
+            if(swap.OwnerA !== signerAddress && swap.OwnerB !== signerAddress)
+              continue; 
+            if(filter === "All"){
+              swaps.push(swap); 
+            }else{
+              if(translateState(getState(swap)) === filter){
+                swaps.push(swap);
+              }
+            } 
+          }catch(e){
+            console.error("Error getting swap ", i, {e});
+          } 
+        }  
+      }catch(e){
+        console.error("Error getting swap count", {e});
+      }
+      
+    
+      profile.querySelector("#loadingSwaps").style.display = "none";
+      if(profile.childNodes.length >= 5){
+        for(var i=profile.childNodes.length-1; i>=5; i--){
+          if(profile.childNodes[i].nodeName === "DIV"){
+            profile.removeChild(profile.childNodes[i])
+          }
         }
-      }
-     
-    } 
-    profile.querySelector("#loadingSwaps").style.display = "none";
-    if(profile.childNodes.length >= 5){
-      for(var i=profile.childNodes.length-1; i>=5; i--){
-        if(profile.childNodes[i].nodeName === "DIV"){
-          profile.removeChild(profile.childNodes[i])
-        }
-      }
-    } 
-    if(swaps.length == 0){
-      const div = document.createElement("div");
-      div.className = "swapCard";
-      div.innerHTML = "No swaps found";
-      profile.appendChild(div);
-    }else{
-      const pageSize = 5;
-      const pageCount = Math.ceil(swaps.length / pageSize); 
-      const url = new URL(window.location.href);
-      const pageS = url.searchParams.get("page") || "1";
-      const page = Math.max(1, Math.min(pageCount, parseInt(pageS)));
-      const start = (page - 1 ) * pageSize;
-
-      if(swaps.length > pageSize){ 
-        profile.appendChild(createPagination(pageCount, page));
-      }
-
-      for(var i=start; i<start + Math.min(pageSize, swaps.length); i++){
-        if(i >= swaps.length)
-          break;
-        const swapE = await createSwapElement(swaps[i]);
-        profile.appendChild(swapE);
-        refreshSwapCard(swaps[i].Id);
       } 
-
-      if(swaps.length > pageSize){ 
-        profile.appendChild(createPagination(pageCount, page));
-      }
-    } 
-  }else{
-    profile.innerHTML="No connected";
-  }
+      if(swaps.length == 0){
+        const div = document.createElement("div");
+        div.className = "swapCard";
+        div.innerHTML = "No swaps found";
+        profile.appendChild(div);
+      }else{
+        const pageSize = 5;
+        const pageCount = Math.ceil(swaps.length / pageSize); 
+        const url = new URL(window.location.href);
+        const pageS = url.searchParams.get("page") || "1";
+        const page = Math.max(1, Math.min(pageCount, parseInt(pageS)));
+        const start = (page - 1 ) * pageSize;
+  
+        if(swaps.length > pageSize){ 
+          profile.appendChild(createPagination(pageCount, page));
+        }
+  
+        for(var i=start; i<start + Math.min(pageSize, swaps.length); i++){
+          if(i >= swaps.length)
+            break;
+          const swapE = await createSwapElement(swaps[i]);
+          profile.appendChild(swapE);
+          refreshSwapCard(swaps[i].Id);
+        } 
+  
+        if(swaps.length > pageSize){ 
+          profile.appendChild(createPagination(pageCount, page));
+        }
+      } 
+    }else{
+      profile.innerHTML="No connected";
+    }
  
+  }catch(error){
+    console.error({error});
+  }
+
 }
 
 function createPagination(pageCount, page){
@@ -1029,7 +1057,7 @@ async function createTokenElement(contract, tokenId){
   div.appendChild(cont);
   return div;
 }
- 
+
 // ##########################
  
 
