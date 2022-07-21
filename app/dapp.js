@@ -5,7 +5,7 @@ const contracts = {
   Mumbai: {
       NFT: {
           ERC721: {
-              contract: "0x23a382B28cEAc26f417053614516a481a94C38dA",
+              contract: "0xEd1D7d05d79AB4F980FBAB452bCD4da365a66548",
               abiSwapper: [
                 {
                   "anonymous": false,
@@ -134,7 +134,7 @@ const contracts = {
                         },
                         {
                           "internalType": "uint256[]",
-                          "name": "tokenIdsA",
+                          "name": "TokenIdsA",
                           "type": "uint256[]"
                         },
                         {
@@ -154,7 +154,7 @@ const contracts = {
                         },
                         {
                           "internalType": "uint256[]",
-                          "name": "tokenIdsB",
+                          "name": "TokenIdsB",
                           "type": "uint256[]"
                         },
                         {
@@ -344,15 +344,15 @@ const contracts = {
   Polygon: {
       NFT: {
           ERC721: {
-              contract: "0x23a382B28cEAc26f417053614516a481a94C38dA",
+              contract: "0xEd1D7d05d79AB4F980FBAB452bCD4da365a66548",
               abiSwapper: [],
               abiNFT: ""
-          },
+          },/*
           ERC1155: {
-              contract: "0x23a382B28cEAc26f417053614516a481a94C38dA", 
+              contract: "", 
               abiSwapper: [],
               abiNFT: "",
-          }
+          }*/
       },
       id: 137,
       scanner: "polygonscan.com", 
@@ -426,12 +426,12 @@ window.onload = async function(){
         break;
       case 2:
         document.getElementById("approveField").value = "0xe1600c43b7113b5eb18d6b2f4f5d4189ad27f9b0";
-        document.getElementById("ownerB").value = "0x4443049b49Caf8Eb4E9235aA1Efe38FcFA0055a1";
-        document.getElementById("nftAddressesB").value = "0xe1600c43b7113b5eb18d6b2f4f5d4189ad27f9b0";
-        document.getElementById("tokensIdsB").value = "1";
-        document.getElementById("ownerA").value = "0xa4Fb556e27CC4024f092709e0B0Ed8A5617F23c3";
-        document.getElementById("nftAddressesA").value = "0xf2e51312856fd2f86246b04a924bf49e197ad0c5";
-        document.getElementById("tokensIdsA").value = "0";
+        document.getElementById("ownerA").value = "0x4443049b49Caf8Eb4E9235aA1Efe38FcFA0055a1";
+        document.getElementById("nftAddressesA").value = "0x1bfbd4972346d6f3e8e2624d39283e894e2b9472";
+        document.getElementById("tokensIdsA").value = "1";
+        document.getElementById("ownerB").value = "0xa4Fb556e27CC4024f092709e0B0Ed8A5617F23c3";
+        document.getElementById("nftAddressesB").value = "0x346f6a9ce8a90348c829dbc2d012f4cf0c32624b";
+        document.getElementById("tokensIdsB").value = "0";
         break;
     }
 
@@ -477,10 +477,7 @@ async function selectSwapperContract(e){
   document.getElementById("contractURL").href = contractURL;
 
   await switchNetwork(); 
-
-  swapperContract = new ethers.Contract(swapperAddress, swapperAbi, signer);
-  swapperContract.on("SwapStateChanged", OnSwapStateChanged);
-
+ 
 }
 
 async function switchNetwork(){
@@ -503,6 +500,15 @@ async function switchNetwork(){
   return false;
 }
 
+function getSwapperContract(){
+  if(swapperContract)
+    return swapperContract;
+
+  swapperContract = new ethers.Contract(swapperAddress, swapperAbi, signer);
+  swapperContract.on("SwapStateChanged", OnSwapStateChanged);
+  return swapperContract;
+}
+
 const isMetaMaskConnected = async () => {
   const accounts = await provider.listAccounts();
   return accounts.length > 0;
@@ -511,9 +517,17 @@ const isMetaMaskConnected = async () => {
 // ##########################
  
 async function OnSwapStateChanged(swapId, state){
-  const swap = await swapperContract.getSwap(swapId);
+  const swap = await getSwapperContract().getSwap(swapId);
   if(swap.OwnerA === signerAddress || swap.OwnerB === signerAddress || debug){
-    console.log(`SwapStateChanged with id = ${swapId.toNumber()} and state = ${translateState(state)}`);
+    console.log(`State of SwapID ${swapId.toNumber()} changed to "${translateState(state)}"`);
+    if(swap.StateA === 0 && swap.StateB === 0){
+      const label = document.getElementById("registeredId"); 
+      label.style.display = "block";
+      label.innerHTML = `Your swap ID is: <span style="font-size:200%;">${swapId}</span>.`;
+      label.scrollIntoView();
+    }else if(swap.StateA === 2 && swap.StateB === 2){
+      alert("🎉 Exchange successfully completed 🎉");
+    }
   }
 }
 
@@ -610,7 +624,7 @@ async function registerButtonClicked(){
   const ownerA = getValue("ownerA");
   const nftAddressesA = getValue("nftAddressesA");
   const tokenIdsA = getValue("tokensIdsA");
-  const ownerB = getValue("ownerB");
+  const ownerB = getValue("ownerB") || ethers.constants.AddressZero;
   const nftAddressesB = getValue("nftAddressesB");
   const tokenIdsB = getValue("tokensIdsB");
   const public = document.getElementById("publicSwap").value;
@@ -623,27 +637,10 @@ async function registerButtonClicked(){
   console.log(nftAddressesB);
   console.log(tokenIdsB);
   console.log(public);*/
-     
-  async function onNewSwapRegistered(swapId, state){
 
-    if(state == 0){  
-      const swap = await swapperContract.getSwap(swapId);  
-      const equals = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]); 
-      console.log(swap.OwnerA, ownerA);
-      console.log(swap.NFTContractA, nftAddressesA);
-      console.log(swap.tokenIdsA, tokenIdsA);
-      if(swap.OwnerA === ownerA && swap.StateA == 0 && swap.StateB == 0
-        && equals(swap.NFTContractA, nftAddressesA) && equals(swap.tokenIdsA.map(b => b.toNumber().toString()), tokenIdsA)
-        && equals(swap.NFTContractB, nftAddressesB) && equals(swap.tokenIdsB.map(b => b.toNumber().toString()), tokenIdsB)){
-          const label = document.getElementById("registeredId"); 
-          label.innerHTML = `Your swap ID is: <span style="font-size:200%;">${swapId}</span>.`;
-          label.scrollIntoView();
-      }
-    } 
-  }
- 
   try{
-    const registerTx = await swapperContract.register(ownerA, nftAddressesA, tokenIdsA, ownerB, nftAddressesB, tokenIdsB, public);
+   
+    const registerTx = await getSwapperContract().register(ownerA, nftAddressesA, tokenIdsA, ownerB, nftAddressesB, tokenIdsB, public);
     const button = document.getElementById("registerButton");
     button.value = "Waiting...";
     button.disabled = true; 
@@ -652,12 +649,11 @@ async function registerButtonClicked(){
     console.log(registerRc);
     button.value = "Registered";
     button.disabled = false; 
-    swapperContract.off("SwapStateChanged", onNewSwapRegistered);
+
   }catch(error){
     alertError(error)
   }
   
-
   displayLoading(false);
 }
 
@@ -667,7 +663,7 @@ async function swapButtonClicked(e){
   const swapId = card.swapId;
   
   try{
-    let swap = await swapperContract.getSwap(swapId);
+    let swap = await getSwapperContract().getSwap(swapId);
     if(swap.OwnerA !== signerAddress && swap.OwnerB !== signerAddress){
       console.error("Not a participant");
       return;
@@ -678,25 +674,31 @@ async function swapButtonClicked(e){
     const button = card.querySelector(`#actionSwapButton${isA ? "A" : "B"}`);
     if(state === 0){
       const nfts = isA ? swap.NFTContractA : swap.NFTContractB;
-      const ids = (isA ? swap.tokenIdsA : swap.tokenIdsB).map(n => n.toNumber());
-  
+      const ids = (isA ? swap.TokenIdsA : swap.TokenIdsB).map(n => n.toNumber());
+      let exit = false;
       for(var i=0; i<nfts.length; i++){
         const nftContract = new ethers.Contract(nfts[i], nftAbi, signer);
         const approved = await nftContract.isApprovedForAll(owner, swapperAddress);
         if(!approved){
-          alert("First you need to give permissions to the Swapper contract to transfer your NFT(s). Once done, press Deposit again.");
-          await nftContract.setApprovalForAll(swapperAddress, true);
-          if(await nftContract.isApprovedForAll(owner, swapperAddress)){
+          exit = true;
+          alert("First you need to give permissions to the Swapper contract to transfer your NFT(s). Please sign a \"setApproveForAll\" transaction on Metamask on each NFT contract address. Once completed, click on \"Deposit\" again.");
+          displayLoading(true); 
+          const approveTx = await nftContract.setApprovalForAll(swapperAddress, true);
+          const isApproved = await nftContract.isApprovedForAll(signerAddress, swapperAddress);
+          console.log(isApproved);
+          if(isApproved){
             alert("Approval for Swapper contract was successfully set.");
           }else{
             alert("Approval for Swapper contract was not set.");
-          }
-          return;
+          } 
         }
       }
+      if(exit)
+        return;
+
       button.innerHTML = "Depositing...";
       button.disabled = true; 
-      const depositTx = await swapperContract.deposit(swapId, nfts, ids);
+      const depositTx = await getSwapperContract().deposit(swapId, nfts, ids);
       displayLoading(true);
       const depositRc = await depositTx.wait();
       console.log(depositRc);
@@ -705,7 +707,7 @@ async function swapButtonClicked(e){
     {
       button.innerHTML = "Claiming...";
       button.disabled = true;
-      const claimTx = await swapperContract.claim(swapId);
+      const claimTx = await getSwapperContract().claim(swapId);
       displayLoading(true)
       const claimRc = await claimTx.wait();
       console.log(claimRc);
@@ -715,7 +717,7 @@ async function swapButtonClicked(e){
     alertError(error);
   }
 
-  await refreshSwapCard(swapperContract, swapId);
+  await refreshSwapCard(swapId);
 
   displayLoading(false);
 
@@ -731,21 +733,21 @@ async function cancelSwapButtonClicked(e){
   e.target.innerHTML = "Cancelling...";
 
   try{
-    const cancelTx = await swapperContract.cancel(swapId);
+    const cancelTx = await getSwapperContract().cancel(swapId);
     displayLoading(true);
     const cancelRc = await cancelTx.wait();
   }catch(error){
     alertError(error);
   }
 
-  await refreshSwapCard(swapperContract, swapId);
+  await refreshSwapCard(swapId);
 
   displayLoading(false);
 }
 
-async function refreshSwapCard(swapperContract, swapId){
+async function refreshSwapCard(swapId){
 
-  const swap = await swapperContract.getSwap(swapId);
+  const swap = await getSwapperContract().getSwap(swapId);
   const card = document.getElementById(`swapCard${swapId}`);
   if(card === undefined)
     return;
@@ -782,8 +784,13 @@ async function refreshSwapCard(swapperContract, swapId){
   }
 
   const actionB = card.querySelector("#actionSwapButtonB");
-  actionB.innerHTML = swap.StateB === 1 ? "Claim" : "Deposit";
-  actionB.disabled = swap.OwnerB !== signerAddress || swapState >= 1 || (swap.StateB === 1 && swap.StateA !== 1);
+  if(swap.StateB === 1){
+    actionB.innerHTML = "Claim";
+    actionB.disabled = !isB || isClaimed || isCancelled || swap.StateA !== 1;
+  }else{
+    actionB.innerHTML = "Deposit";
+    actionB.disabled = !isB || !isPending;
+  }
 }
 
 function displayLoading(show){
@@ -800,12 +807,12 @@ function displayLoading(show){
 async function displayProfile(){
   const profile = document.getElementById("profile");
   if(connected){ 
-    const count = (await swapperContract.getSwapCount()).toNumber();
+    const count = (await getSwapperContract().getSwapCount()).toNumber();
     const swaps = [];
     const filter = document.getElementById("profileFilter").value;
 
     for(var i=1; i<=count; i++){
-      const swap = await swapperContract.getSwap(i);
+      const swap = await getSwapperContract().getSwap(i);
       if(swap.OwnerA !== signerAddress && swap.OwnerB !== signerAddress)
         continue;
 
@@ -848,7 +855,7 @@ async function displayProfile(){
           break;
         const swapE = await createSwapElement(swaps[i]);
         profile.appendChild(swapE);
-        refreshSwapCard(swapperContract, swaps[i].Id);
+        refreshSwapCard(swaps[i].Id);
       } 
 
       if(swaps.length > pageSize){ 
@@ -890,7 +897,10 @@ function createPagination(pageCount, page){
 }
 
 async function createSwapElement(swap){  
-  const swapState = translateStateWithEmoji(getState(swap));
+
+  const stateIndex = getState(swap);
+  const swapState = translateState(stateIndex);
+  const swapStateE = translateStateWithEmoji(stateIndex);
   const div = document.createElement("div");
   div.className = "swapCard";
   div.swapId = swap.Id.toNumber(); 
@@ -899,28 +909,28 @@ async function createSwapElement(swap){
   idE.className = "swapCardId";
   idE.id = "swapCardTitle";
   //idE.innerHTML = `ID: ${swap.Id}  |  Public: ${swap.Public}  |  State: <b>${swapState}</b>`;
-  idE.innerHTML = `ID: ${swap.Id}  |  State: <b>${swapState}</b>`;
+  idE.innerHTML = `ID: ${swap.Id}  |  State: <b>${swapStateE}</b>`;
   div.appendChild(idE); 
 
   const groupE = document.createElement("div");
   groupE.className = "swapCardGroup";
   div.appendChild(groupE);
   
-  const groupA = await createParticipantElement(swap.OwnerA, swap.StateA, swap.NFTContractA, swap.tokenIdsA, swapState, "A");
+  const groupA = await createParticipantElement(swap.OwnerA, swap.StateA, swap.NFTContractA, swap.TokenIdsA, swapState, "A");
   groupE.appendChild(groupA);
- 
-
+  
   const groupS = document.createElement("div");
   groupS.className = "swapCardGroupSeparator";
   groupE.appendChild(groupS);
 
-  const groupB = await createParticipantElement(swap.OwnerB, swap.StateB, swap.NFTContractB, swap.tokenIdsB, swapState, "B");
+  const groupB = await createParticipantElement(swap.OwnerB, swap.StateB, swap.NFTContractB, swap.TokenIdsB, swapState, "B");
   groupE.appendChild(groupB);
 
   return div;
 }
 
 async function createParticipantElement(owner, state, contracts, tokens, swapState, side){
+
   const div = document.createElement("div");
   div.className = "swapCardGroupColumn"; 
  
@@ -930,9 +940,12 @@ async function createParticipantElement(owner, state, contracts, tokens, swapSta
 
   const ownerE = document.createElement("a");
   ownerE.className = "swapCardTokenText";
-  ownerE.innerHTML = owner;
-  ownerE.target = "_blank";
-  ownerE.href = `https:/${scanner}/address/${owner}`; 
+  ownerE.innerHTML = owner === ethers.constants.AddressZero ? "Any address" : owner;
+  if(owner !== ethers.constants.AddressZero){
+    ownerE.target = "_blank";
+    ownerE.href = `https:/${scanner}/address/${owner}`; 
+  }
+
   divTop.appendChild(ownerE);
 
   const stateE = document.createElement("div");
@@ -1052,13 +1065,13 @@ function translateState(stateIndex){
 function translateStateWithEmoji(stateIndex){
     switch(stateIndex){
         case 0:
-            return "Pending <span class='emoji'>✋</span>";
+            return "Pending <span class='emoji'>📌</span>";
         case 1:
-            return "Deposited <span class='emoji'>👍</span>";
+            return "Deposited <span class='emoji'>📫</span>";
         case 2:
             return "Claimed <span class='emoji'>🤝</span>";
         case 3:
-            return "Cancelled <span class='emoji'>👎</span>";
+            return "Cancelled <span class='emoji'>❌</span>";
         default:
             return translateStateWithEmoji(0);
     }
