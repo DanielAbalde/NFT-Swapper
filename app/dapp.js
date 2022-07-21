@@ -1,5 +1,5 @@
 
-let debug = true;
+let debug = false;
 
 const contracts = { 
   Mumbai: {
