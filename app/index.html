@@ -7,7 +7,8 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="style.css">
-    <script type="text/javascript"  integrity="sha384-qU3nvpskWirnJuSLmQWFfAFKbiN5+JKbAEEoTOcPYJu3s1xCe66b66sUER3x5wVF" crossorigin="anonymous" src="https://cdn-cors.ethers.io/lib/ethers-5.6.9.umd.min.js"> </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script type="text/javascript"  integrity="sha384-qU3nvpskWirnJuSLmQWFfAFKbiN5+JKbAEEoTOcPYJu3s1xCe66b66sUER3x5wVF" crossorigin="anonymous" src="https://cdn-cors.ethers.io/lib/ethers-5.6.9.umd.min.js"> </script>  
   </head>
   <body>
     <div class="container">
@@ -51,7 +52,6 @@
           </div> 
         
         </div>
-
         <div id="approve" class="step" style="display: none;">
           <form action="javascript:approveButtonClicked(approveField.value)" class="botCol">
             <div class="formGroup">
@@ -126,10 +126,32 @@
           </div> 
           <div id="loadingSwaps" style="font-style: italic; margin-top:50px; width: 100%; text-align: center;"> Loading your swaps... <span class="emoji" style="display: inline-block; animation: spin 3s infinite linear;">⌛</span></div>
         </div>
-
+        <div id="about" class="step" style="display:none;">
+          <h1>About</h1>
+        <br>
+        Peer to peer exchange of multiple NFTs.
+        <br> <br> <br> 
+        <h3>Contract Addresses</h3>
+        <div id="aboutContracts"></div>
+        <div>
+          <h3>Contribute</h3>
+          <ul>
+            <li>Issues and Pull Request on <a href="https://github.com/DanielAbalde/NFT-Swapper" target="_blank">Github</a> are welcome.</li>
+            <li>Let me know if you deploy the contracts on a different EVM blockchain.</li>
+            <li>Buy me a coffee ☕: 0x4443049b49Caf8Eb4E9235aA1Efe38FcFA0055a1</li>
+            <li>Share it on social media!</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Contact</h3>
+          <ul>
+            <li><a href="https://www.twitter.com/DGANFT"><i class="fab fa-twitter"></i> @DGANFT</a></li>
+            <li><a href="https://discord.gg/H4WMdnz5nw"><i class="fab fa-discord"></i> DaniGA#9856</a></li>
+          </ul>
+        </div>
+        </div> 
       </div> 
-      <div id="connectToAccess">Connect to access. 🔑</div>
-      
+      <div id="connectToAccess">Connect to access. 🔑</div>    
     </div> 
       <div id="loadingSplash" style="min-width: 100%; min-height: 100%; z-index: 9999; position: absolute; top:0; left:0; display:none">
         <svg version="1.1" id="loadingSVG" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  width="100%" height="100%" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">

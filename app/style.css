@@ -25,10 +25,15 @@ a:visited {
  
 a:hover {
   color: rgb(255, 0, 175);
+  text-decoration: underline;
 }
  
 a:active {
   color: rgb(0, 255, 255);
+}
+
+a{
+  text-decoration: none;
 }
 
 p, label, a { 
@@ -45,6 +50,12 @@ img{
   max-height:min(200px, 100%);
   border: #fff solid 1px;
 }
+
+th, td {
+  padding: 10px;
+}
+
+ 
 
 .container {
   display:flex;
@@ -315,3 +326,14 @@ img{
   }
 }
  
+#about{
+  text-align: left;
+}
+
+#aboutContracts{
+  text-align: center;
+  display: flex;
+  align-content: flex-start;
+  flex-direction: column;
+  padding-bottom: 10px;
+}

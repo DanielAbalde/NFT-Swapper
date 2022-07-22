@@ -1,370 +1,14 @@
 
-let debug = false;
-
-const contracts = { 
-  Mumbai: {
-      NFT: {
-          ERC721: {
-              contract: "0xEd1D7d05d79AB4F980FBAB452bCD4da365a66548",
-              abiSwapper: [
-                {
-                  "anonymous": false,
-                  "inputs": [
-                    {
-                      "indexed": true,
-                      "internalType": "uint256",
-                      "name": "swapId",
-                      "type": "uint256"
-                    },
-                    {
-                      "indexed": true,
-                      "internalType": "enum NFTSwapper.SwapState",
-                      "name": "state",
-                      "type": "uint8"
-                    }
-                  ],
-                  "name": "SwapStateChanged",
-                  "type": "event"
-                },
-                {
-                  "inputs": [
-                    {
-                      "internalType": "uint256",
-                      "name": "swapId",
-                      "type": "uint256"
-                    }
-                  ],
-                  "name": "cancel",
-                  "outputs": [],
-                  "stateMutability": "nonpayable",
-                  "type": "function"
-                },
-                {
-                  "inputs": [
-                    {
-                      "internalType": "uint256",
-                      "name": "swapId",
-                      "type": "uint256"
-                    }
-                  ],
-                  "name": "claim",
-                  "outputs": [],
-                  "stateMutability": "nonpayable",
-                  "type": "function"
-                },
-                {
-                  "inputs": [
-                    {
-                      "internalType": "uint256",
-                      "name": "swapId",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "address[]",
-                      "name": "nftAddresses",
-                      "type": "address[]"
-                    },
-                    {
-                      "internalType": "uint256[]",
-                      "name": "tokenIds",
-                      "type": "uint256[]"
-                    }
-                  ],
-                  "name": "deposit",
-                  "outputs": [
-                    {
-                      "internalType": "bool",
-                      "name": "deposited",
-                      "type": "bool"
-                    }
-                  ],
-                  "stateMutability": "nonpayable",
-                  "type": "function"
-                },
-                {
-                  "inputs": [
-                    {
-                      "internalType": "uint256",
-                      "name": "swapId",
-                      "type": "uint256"
-                    }
-                  ],
-                  "name": "getState",
-                  "outputs": [
-                    {
-                      "internalType": "enum NFTSwapper.SwapState",
-                      "name": "",
-                      "type": "uint8"
-                    }
-                  ],
-                  "stateMutability": "view",
-                  "type": "function"
-                },
-                {
-                  "inputs": [
-                    {
-                      "internalType": "uint256",
-                      "name": "swapId",
-                      "type": "uint256"
-                    }
-                  ],
-                  "name": "getSwap",
-                  "outputs": [
-                    {
-                      "components": [
-                        {
-                          "internalType": "uint256",
-                          "name": "Id",
-                          "type": "uint256"
-                        },
-                        {
-                          "internalType": "enum NFTSwapper.SwapState",
-                          "name": "StateA",
-                          "type": "uint8"
-                        },
-                        {
-                          "internalType": "address",
-                          "name": "OwnerA",
-                          "type": "address"
-                        },
-                        {
-                          "internalType": "address[]",
-                          "name": "NFTContractA",
-                          "type": "address[]"
-                        },
-                        {
-                          "internalType": "uint256[]",
-                          "name": "TokenIdsA",
-                          "type": "uint256[]"
-                        },
-                        {
-                          "internalType": "enum NFTSwapper.SwapState",
-                          "name": "StateB",
-                          "type": "uint8"
-                        },
-                        {
-                          "internalType": "address",
-                          "name": "OwnerB",
-                          "type": "address"
-                        },
-                        {
-                          "internalType": "address[]",
-                          "name": "NFTContractB",
-                          "type": "address[]"
-                        },
-                        {
-                          "internalType": "uint256[]",
-                          "name": "TokenIdsB",
-                          "type": "uint256[]"
-                        },
-                        {
-                          "internalType": "bool",
-                          "name": "Public",
-                          "type": "bool"
-                        }
-                      ],
-                      "internalType": "struct NFTSwapper.Swap",
-                      "name": "",
-                      "type": "tuple"
-                    }
-                  ],
-                  "stateMutability": "view",
-                  "type": "function"
-                },
-                {
-                  "inputs": [],
-                  "name": "getSwapCount",
-                  "outputs": [
-                    {
-                      "internalType": "uint256",
-                      "name": "",
-                      "type": "uint256"
-                    }
-                  ],
-                  "stateMutability": "view",
-                  "type": "function"
-                },
-                {
-                  "inputs": [
-                    {
-                      "internalType": "address",
-                      "name": "nft",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "tokenId",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "account",
-                      "type": "address"
-                    }
-                  ],
-                  "name": "isOwnerOf",
-                  "outputs": [
-                    {
-                      "internalType": "bool",
-                      "name": "",
-                      "type": "bool"
-                    }
-                  ],
-                  "stateMutability": "view",
-                  "type": "function"
-                },
-                {
-                  "inputs": [
-                    {
-                      "internalType": "address",
-                      "name": "ownerA",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "address[]",
-                      "name": "nftAddressesA",
-                      "type": "address[]"
-                    },
-                    {
-                      "internalType": "uint256[]",
-                      "name": "tokenIdsA",
-                      "type": "uint256[]"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "ownerB",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "address[]",
-                      "name": "nftAddressesB",
-                      "type": "address[]"
-                    },
-                    {
-                      "internalType": "uint256[]",
-                      "name": "tokenIdsB",
-                      "type": "uint256[]"
-                    },
-                    {
-                      "internalType": "bool",
-                      "name": "public_",
-                      "type": "bool"
-                    }
-                  ],
-                  "name": "register",
-                  "outputs": [
-                    {
-                      "internalType": "uint256",
-                      "name": "swapId",
-                      "type": "uint256"
-                    }
-                  ],
-                  "stateMutability": "nonpayable",
-                  "type": "function"
-                },
-                {
-                  "inputs": [
-                    {
-                      "internalType": "address",
-                      "name": "from",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "address[]",
-                      "name": "nftAddresses",
-                      "type": "address[]"
-                    },
-                    {
-                      "internalType": "uint256[]",
-                      "name": "tokenIds",
-                      "type": "uint256[]"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "to",
-                      "type": "address"
-                    }
-                  ],
-                  "name": "transferBatchOwnership",
-                  "outputs": [
-                    {
-                      "internalType": "bool",
-                      "name": "",
-                      "type": "bool"
-                    }
-                  ],
-                  "stateMutability": "nonpayable",
-                  "type": "function"
-                },
-                {
-                  "inputs": [
-                    {
-                      "internalType": "address",
-                      "name": "from",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "nftAddress",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "tokenId",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "to",
-                      "type": "address"
-                    }
-                  ],
-                  "name": "transferOwnership",
-                  "outputs": [
-                    {
-                      "internalType": "bool",
-                      "name": "",
-                      "type": "bool"
-                    }
-                  ],
-                  "stateMutability": "nonpayable",
-                  "type": "function"
-                }
-              ],
-              abiNFT: [
-                "function setApprovalForAll(address _operator, bool _approved) external", 
-                "function isApprovedForAll(address _owner, address _operator) external view returns (bool)",
-                "function tokenURI(uint256 tokenId) external view returns (string memory)",
-                "function name() external view returns (string memory)"
-              ]
-          }
-      },
-      id: 80001,
-      scanner: "mumbai.polygonscan.com", 
-  },
-  Polygon: {
-      NFT: {
-          ERC721: {
-              contract: "0xEd1D7d05d79AB4F980FBAB452bCD4da365a66548",
-              abiSwapper: [],
-              abiNFT: ""
-          },/*
-          ERC1155: {
-              contract: "", 
-              abiSwapper: [],
-              abiNFT: "",
-          }*/
-      },
-      id: 137,
-      scanner: "polygonscan.com", 
-  }
-}
-
-let provider, signer, signerAddress, connected, networkId, scanner, swapperAddress, contractURL, nftAbi, swapperAbi;
+let debug = true;
+let contracts, provider, signer, signerAddress, connected, networkId, scanner, swapperAddress, contractURL, nftAbi, swapperAbi;
 let swapperContract = undefined;
 let waiting = false;
 
+const loadContractJSON = fetch("./contracts.json").then(response => { return response.json(); }).then(json => { return json; });
+
 window.onload = async function(){ 
+
+  contracts = await loadContractJSON;
 
   if(window.ethereum){
     provider = new ethers.providers.Web3Provider(window.ethereum, "any");
@@ -392,11 +36,11 @@ window.onload = async function(){
 
   await selectSwapperContract({id: "init"});
 
-
   document.getElementById("connectToAccess").innerHTML = connected ? "" : "Connect to access. 🔑";
   document.getElementById("approve").style.display = "none";
   document.getElementById("register").style.display = "none";
   document.getElementById("profile").style.display = "none";
+  document.getElementById("about").style.display = "none";
   if(connected){ 
     const url = new URL(window.location.href);
     const view = url.searchParams.get("view") || "register";
@@ -406,7 +50,10 @@ window.onload = async function(){
     }else if(view == "profile"){
       document.getElementById("profile").style.display = "block";
       displayProfile();
-    } 
+    }else if(view == "about"){
+      document.getElementById("about").style.display = "block";
+      createAboutPage();
+    }
   }
  
   if(debug){
@@ -956,8 +603,8 @@ async function createSwapElement(swap){
   groupE.appendChild(groupB);
 
   return div;
-}
 
+  
 async function createParticipantElement(owner, state, contracts, tokens, swapState, side){
 
   const div = document.createElement("div");
@@ -1026,38 +673,100 @@ async function createParticipantElement(owner, state, contracts, tokens, swapSta
   }
   butAction.disabled |= owner != signerAddress || swapState == "Cancelled" || swapState == "Claimed";
   return div;
+
+  
+  async function createTokenElement(contract, tokenId){
+    const div = document.createElement("div");
+    div.className = "swapCardToken";
+
+    const nftContract = new ethers.Contract(contract, nftAbi, signer);
+    const tokenURI = await nftContract.tokenURI(tokenId);
+    let json = await (await fetch(tokenURI)).json();
+  
+    const img = document.createElement("img");
+    img.src = json.image; 
+    const title = document.createElement("p");
+    title.className = "swapCardTokenText";
+    title.innerHTML = json.name;
+    const id = document.createElement("p");
+    id.className = "swapCardTokenText";
+    id.innerHTML = `Token Id: ${tokenId}`; 
+  
+    const cont = document.createElement("a");
+    cont.className = "swapCardTokenText";
+    cont.innerHTML = contract;
+    cont.target="_blank";
+    cont.href = `https:/${scanner}/address/${contract}`;
+
+    div.appendChild(img);
+    div.appendChild(title);
+    div.appendChild(id);
+    div.appendChild(cont);
+    return div;
+  }
 }
 
-async function createTokenElement(contract, tokenId){
+}
+
+
+function createAboutPage(){
   const div = document.createElement("div");
-  div.className = "swapCardToken";
-
-  const nftContract = new ethers.Contract(contract, nftAbi, signer);
-  const tokenURI = await nftContract.tokenURI(tokenId);
-  let json = await (await fetch(tokenURI)).json();
- 
-  const img = document.createElement("img");
-  img.src = json.image; 
+  div.className = "swapCard";
+  div.id = "swapCardAbout";
   const title = document.createElement("p");
-  title.className = "swapCardTokenText";
-  title.innerHTML = json.name;
-  const id = document.createElement("p");
-  id.className = "swapCardTokenText";
-  id.innerHTML = `Token Id: ${tokenId}`; 
- 
-  const cont = document.createElement("a");
-  cont.className = "swapCardTokenText";
-  cont.innerHTML = contract;
-  cont.target="_blank";
-  cont.href = `https:/${scanner}/address/${contract}`;
-
-  div.appendChild(img);
+  title.className = "swapCardTitle";
+  title.innerHTML = "About";
   div.appendChild(title);
-  div.appendChild(id);
-  div.appendChild(cont);
-  return div;
+  const text = document.createElement("p");
+  text.className = "swapCardText";
+  text.innerHTML = "This is a demo of the Swap contract. It is not a real contract, but it is a demo of how to use the Swap contract.";
+  div.appendChild(text);
+  // document.getElementById("about").innerHTML = `<p>This dapp is developed by <a href="https://polygonscan.com" target="_blank">PolygonScan</a> and is a part of the <a href="https://polygonscan.com/polygon-scan-dapp" target="_blank">PolygonScan DApp</a>.</p>`;
+  
+  const aboutContractsDiv = document.getElementById("aboutContracts");
+ 
+  const table = document.createElement("table");
+  table.className = "swapCardTable SwapCardText";
+  const thead = document.createElement("thead");
+  const tr = document.createElement("tr");
+  const th1 = document.createElement("th");
+  th1.innerHTML = "Chain";
+  const th2 = document.createElement("th");
+  th2.innerHTML = "ERC721";
+  const th3 = document.createElement("th");
+  th3.innerHTML = "ERC1155";
+  tr.appendChild(th1);
+  tr.appendChild(th2);
+  tr.appendChild(th3);
+  thead.appendChild(tr);
+ 
+  const tbody = document.createElement("tbody");
+  Object.keys(contracts).forEach(chain => {
+    const tr = document.createElement("tr");
+    const td1 = document.createElement("td");
+    td1.innerHTML = chain;
+    tr.appendChild(td1);
+    const td2 = document.createElement("td");
+    const erc721 = contracts[chain]["NFT"]["ERC721"];
+    if(erc721 !== undefined){  
+      td2.innerHTML = `<a target = "_blank" href= "https:/${scanner}/address/${erc721.contract}">${erc721.contract}</a>`;
+      tr.appendChild(td2);
+    }
+    const td3 = document.createElement("td");
+    const erc1155 = contracts[chain]["NFT"]["ERC1155"];
+    if(erc1155 !== undefined){
+      td3.innerHTML = `<a target = "_blank" href= "https:/${scanner}/address/${erc1155.contract}">${erc1155.contract}</a>`;
+      tr.appendChild(td3);
+    }
+    tbody.appendChild(tr);
+  });
+  table.appendChild(thead);
+  table.appendChild(tbody);
+  aboutContractsDiv.appendChild(table);
+ 
 }
 
+ 
 // ##########################
  
 
