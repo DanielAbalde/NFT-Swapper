@@ -1,5 +1,5 @@
 
-let debug = true;
+let debug = false;
 let contracts, provider, signer, signerAddress, connected, networkId, scanner, swapperAddress, contractURL, signerURL, nftAbi, swapperAbi, platform;
 let swapperContract = undefined;
 let waiting = false;
