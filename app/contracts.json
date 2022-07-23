@@ -337,7 +337,8 @@
           }
       },
       "id": 80001,
-      "scanner": "mumbai.polygonscan.com" 
+      "scanner": "mumbai.polygonscan.com",
+      "platform": "testnets.opensea.io/assets/mumbai"
   },
   "Polygon": {
       "NFT": {
@@ -348,6 +349,7 @@
           } 
       },
       "id": 137,
-      "scanner": "polygonscan.com" 
+      "scanner": "polygonscan.com",
+      "platform": "opensea.io/assets/matic"
   }
 }

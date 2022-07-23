@@ -1,6 +1,6 @@
 
 let debug = true;
-let contracts, provider, signer, signerAddress, connected, networkId, scanner, swapperAddress, contractURL, nftAbi, swapperAbi;
+let contracts, provider, signer, signerAddress, connected, networkId, scanner, swapperAddress, contractURL, signerURL, nftAbi, swapperAbi, platform;
 let swapperContract = undefined;
 let waiting = false;
 
@@ -35,8 +35,7 @@ window.onload = async function(){
   });
 
   await selectSwapperContract({id: "init"});
-
-  document.getElementById("connectToAccess").innerHTML = connected ? "" : "Connect to access. 🔑";
+ 
   document.getElementById("approve").style.display = "none";
   document.getElementById("register").style.display = "none";
   document.getElementById("profile").style.display = "none";
@@ -63,28 +62,28 @@ window.onload = async function(){
         document.getElementById("approveField").value = "0xF2e51312856FD2f86246b04A924BF49E197Ad0c5";
         document.getElementById("ownerA").value = "0xa4Fb556e27CC4024f092709e0B0Ed8A5617F23c3";
         document.getElementById("nftAddressesA").value = "0xF2e51312856FD2f86246b04A924BF49E197Ad0c5, 0xF2e51312856FD2f86246b04A924BF49E197Ad0c5";
-        document.getElementById("tokensIdsA").value = "2, 3";
+        document.getElementById("tokenIdsA").value = "2, 3";
         document.getElementById("ownerB").value = "0x4443049b49Caf8Eb4E9235aA1Efe38FcFA0055a1";
         document.getElementById("nftAddressesB").value = "0x1bfbd4972346D6f3e8e2624D39283e894e2b9472";
-        document.getElementById("tokensIdsB").value = "0";
+        document.getElementById("tokenIdsB").value = "0";
       break;
       case 1:
         document.getElementById("approveField").value = "0xe1600c43b7113b5eb18d6b2f4f5d4189ad27f9b0";
         document.getElementById("ownerA").value = "0x4443049b49Caf8Eb4E9235aA1Efe38FcFA0055a1";
         document.getElementById("nftAddressesA").value = "0xe1600c43b7113b5eb18d6b2f4f5d4189ad27f9b0";
-        document.getElementById("tokensIdsA").value = "1";
+        document.getElementById("tokenIdsA").value = "1";
         document.getElementById("ownerB").value = "0xa4Fb556e27CC4024f092709e0B0Ed8A5617F23c3";
         document.getElementById("nftAddressesB").value = "0xf2e51312856fd2f86246b04a924bf49e197ad0c5";
-        document.getElementById("tokensIdsB").value = "0";
+        document.getElementById("tokenIdsB").value = "0";
         break;
       case 2:
         document.getElementById("approveField").value = "0xe1600c43b7113b5eb18d6b2f4f5d4189ad27f9b0";
         document.getElementById("ownerA").value = "0x4443049b49Caf8Eb4E9235aA1Efe38FcFA0055a1";
         document.getElementById("nftAddressesA").value = "0x1bfbd4972346d6f3e8e2624d39283e894e2b9472";
-        document.getElementById("tokensIdsA").value = "1";
+        document.getElementById("tokenIdsA").value = "1";
         document.getElementById("ownerB").value = "0xa4Fb556e27CC4024f092709e0B0Ed8A5617F23c3";
         document.getElementById("nftAddressesB").value = "0x346f6a9ce8a90348c829dbc2d012f4cf0c32624b";
-        document.getElementById("tokensIdsB").value = "0";
+        document.getElementById("tokenIdsB").value = "0";
         break;
     }
 
@@ -92,6 +91,9 @@ window.onload = async function(){
 
 }
  
+function initVariables(){
+
+}
 async function selectSwapperContract(e){
   const chainElement = document.getElementById("chains");
   const chain = chainElement.value;
@@ -122,13 +124,15 @@ async function selectSwapperContract(e){
   }  
   networkId = contracts[chain].id;
   scanner = contracts[chain].scanner; 
+  platform = contracts[chain].platform;
   swapperAbi = contracts[chain].NFT[nftElement.value].abiSwapper;
   swapperAddress = contracts[chain].NFT[nftElement.value].contract;
   contractURL = `https:/${scanner}/address/${swapperAddress}#code`;
-  nftAbi = contracts[chain].NFT[nftElement.value].abiNFT; 
-  
-  document.getElementById("contractURL").href = contractURL;
+  signerURL = `https:/${scanner}/address/${signerAddress}`;
+  nftAbi = contracts[chain].NFT[nftElement.value].abiNFT;  
 
+  document.getElementById("contractURL").href = contractURL;
+  document.getElementById("connectLabel").href = signerURL; 
   if(e.id === "init")
   await switchNetwork(); 
  
@@ -140,8 +144,8 @@ async function switchNetwork(){
       networkId = contracts[document.getElementById("chains").value].id;
     const { chainId } = await provider.getNetwork();
     if(networkId !== chainId){  
-      try { 
-        await ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: `0x${Number(networkId).toString(16)}` }], });
+      try {  
+        await ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: `0x${Number(networkId).toString(16)}` }], }); 
       } catch (switchError) { 
         if (switchError.code === 4902) {
           alert("Please connect to the correct network on Metamask"); 
@@ -218,6 +222,7 @@ async function connectButtonClicked(){
 function refreshConnectButton(){
   document.getElementById("connectButton").innerHTML = connected ? 'Connected' : 'Connect';
   document.getElementById("connectLabel").innerHTML = connected ? signerAddress : "No address";
+  document.getElementById("connectToAccess").innerHTML = connected ? "" : "Connect to access. 🔑";
 }
 
 async function approveButtonClicked(e){ 
@@ -392,7 +397,7 @@ async function cancelSwapButtonClicked(e){
   e.target.innerHTML = "Cancelling...";
 
   try{  
-    const cancelTx = await getSwapperContract().cancel(swapId); console.log("OJ");
+    const cancelTx = await getSwapperContract().cancel(swapId);
     displayLoading(true);
     const cancelRc = await cancelTx.wait();
     console.log(cancelRc);
@@ -415,8 +420,26 @@ async function refreshSwapCard(swapId){
   const swapState = getState(swap);
   const swapStateS = translateStateWithEmoji(swapState);
 
+  let color = "#000000";
+  switch(swapState){
+    case 0:
+      color = "rgb(0, 175, 255, 0.4)";
+      break;
+    case 1:
+      color = "rgb(175, 255, 0, 0.4)";
+      break;
+    case 2:
+      color = "rgb(255, 175, 0, 0.4)";
+      break;
+    case 3:
+      color = "rgb(255, 0, 175, 0.4)";
+      break;
+  }
+  card.style = `box-shadow: 0px 0px 30px 0px #000000, 0px 0px 10px 0px ${color}; background-color: ${color.replace("0.4", "0.02")};`;
+
   //card.querySelector("#swapCardTitle").innerHTML = `ID: ${swap.Id}  |  Public: ${swap.Public}  |  State: <b>${swapStateS}</b>`;
-  card.querySelector("#swapCardTitle").innerHTML = `ID: ${swap.Id}  |  State: <b>${swapStateS}</b>`;
+  //card.querySelector("#swapCardTitle").innerHTML = `Swap ID <b>${swap.Id}</b> is <b>${swapStateS}</b>`;
+  card.querySelector("#swapCardTitle").innerHTML = `#${swap.Id}`;
   card.querySelector("#swapParticipantStateA").innerHTML = translateStateWithEmoji(swap.StateA);
   card.querySelector("#swapParticipantStateB").innerHTML = translateStateWithEmoji(swap.StateB); 
 
@@ -495,8 +518,7 @@ async function displayProfile(){
       }catch(e){
         console.error("Error getting swap count", {e});
       }
-      
-    
+       
       profile.querySelector("#loadingSwaps").style.display = "none";
       if(profile.childNodes.length >= 5){
         for(var i=profile.childNodes.length-1; i>=5; i--){
@@ -510,14 +532,21 @@ async function displayProfile(){
         div.className = "swapCard";
         div.innerHTML = "No swaps found";
         profile.appendChild(div);
-      }else{
+      }else{ 
         const pageSize = 5;
         const pageCount = Math.ceil(swaps.length / pageSize); 
         const url = new URL(window.location.href);
-        const pageS = url.searchParams.get("page") || "1";
-        const page = Math.max(1, Math.min(pageCount, parseInt(pageS)));
+        const pageS = url.searchParams.get("page") || "-1";
+        let pageInt = parseInt(pageS);
+        if(pageInt === undefined){
+          pageInt = 1;
+        }else if(pageInt < 0){
+          pageInt = pageCount;
+        }
+         
+        const page = Math.max(1, Math.min(pageCount, pageInt));
         const start = (page - 1 ) * pageSize;
-  
+        
         if(swaps.length > pageSize){ 
           profile.appendChild(createPagination(pageCount, page));
         }
@@ -532,7 +561,7 @@ async function displayProfile(){
   
         if(swaps.length > pageSize){ 
           profile.appendChild(createPagination(pageCount, page));
-        }
+        } 
       } 
     }else{
       profile.innerHTML="No connected";
@@ -550,7 +579,7 @@ function createPagination(pageCount, page){
   div.className = "pagination";
   const a0 = document.createElement("a");
   a0.href = `?view=profile&page=${page-1}`;
-  a0.innerHTML = "&lt;&lt;";
+  a0.innerHTML = "&lt;";
   if(page <= 1)
     a0.style = "pointer-events:none;";
   div.appendChild(a0);
@@ -565,7 +594,7 @@ function createPagination(pageCount, page){
   }
   const a1 = document.createElement("a");
   a1.href = `?view=profile&page=${page+1}`;
-  a1.innerHTML = "&gt;&gt;";
+  a1.innerHTML = "&gt;";
   if(page >= pageCount)
     a1.style = "pointer-events:none;";
   div.appendChild(a1);
@@ -577,6 +606,7 @@ async function createSwapElement(swap){
   const stateIndex = getState(swap);
   const swapState = translateState(stateIndex);
   const swapStateE = translateStateWithEmoji(stateIndex);
+
   const div = document.createElement("div");
   div.className = "swapCard";
   div.swapId = swap.Id.toNumber(); 
@@ -584,9 +614,10 @@ async function createSwapElement(swap){
   const idE = document.createElement("p");
   idE.className = "swapCardId";
   idE.id = "swapCardTitle";
-  //idE.innerHTML = `ID: ${swap.Id}  |  Public: ${swap.Public}  |  State: <b>${swapState}</b>`;
-  idE.innerHTML = `ID: ${swap.Id}  |  State: <b>${swapStateE}</b>`;
   div.appendChild(idE); 
+  //idE.innerHTML = `ID: ${swap.Id}  |  Public: ${swap.Public}  |  State: <b>${swapState}</b>`;
+  //idE.innerHTML = `ID: ${swap.Id}, <b>${swapState}</b>`;
+  idE.innerHTML = `#${swap.Id}`;
 
   const groupE = document.createElement("div");
   groupE.className = "swapCardGroup";
@@ -614,8 +645,15 @@ async function createParticipantElement(owner, state, contracts, tokens, swapSta
   divTop.className = "swapCardGroupColumnDiv swapCardGroupColumnTop"; 
   div.appendChild(divTop);
 
+  const stateE = document.createElement("div");
+  stateE.className = "swapCardTokenText";
+  stateE.id = `swapParticipantState${side}`;
+  stateE.style = "font-style: italic; padding-bottom:5px;"; 
+  stateE.innerHTML = translateStateWithEmoji(state);
+  divTop.appendChild(stateE);
+
   const ownerE = document.createElement("a");
-  ownerE.className = "swapCardTokenText";
+  ownerE.className = "swapCardTokenText"; 
   ownerE.innerHTML = owner === ethers.constants.AddressZero ? "Any address" : owner;
   if(owner !== ethers.constants.AddressZero){
     ownerE.target = "_blank";
@@ -624,12 +662,6 @@ async function createParticipantElement(owner, state, contracts, tokens, swapSta
 
   divTop.appendChild(ownerE);
 
-  const stateE = document.createElement("div");
-  stateE.className = "swapCardTokenText";
-  stateE.id = `swapParticipantState${side}`;
-  stateE.style = "font-style: italic; padding-bottom:15px;"; 
-  stateE.innerHTML = translateStateWithEmoji(state);
-  divTop.appendChild(stateE);
 
   const divMid = document.createElement("div");
   divMid.className = "swapCardGroupColumnDiv";  
@@ -687,7 +719,7 @@ async function createParticipantElement(owner, state, contracts, tokens, swapSta
     img.src = json.image; 
     const title = document.createElement("p");
     title.className = "swapCardTokenText";
-    title.innerHTML = json.name;
+    title.innerHTML = `<a href="https://${platform}/${contract}/${tokenId}" target="_blank"><b>${json.name}</b></a>`;
     const id = document.createElement("p");
     id.className = "swapCardTokenText";
     id.innerHTML = `Token Id: ${tokenId}`; 
@@ -803,7 +835,7 @@ function translateState(stateIndex){
 function translateStateWithEmoji(stateIndex){
     switch(stateIndex){
         case 0:
-            return "Pending <span class='emoji'>📌</span>";
+            return "Pending <span class='emoji'>📥</span>";
         case 1:
             return "Deposited <span class='emoji'>📫</span>";
         case 2:

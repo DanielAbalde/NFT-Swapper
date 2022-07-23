@@ -1,19 +1,33 @@
 *{
-  box-sizing: border-box;
+  box-sizing: border-box; 
 }
 html, body { 
 	background: rgb(50, 50, 50);
 	color: #fff;
   padding: 0;
-  margin: 0; 
+  margin: 0;
+
 } 
 
 body {
 	font-size: min(1.2rem, 16px);
   font-family: 'Verdana';
 	text-rendering: optimizeLegibility;  
-  justify-content: center; 
+  justify-content: center;  
 }
+
+body::-webkit-scrollbar {
+  width: 10px;   
+}
+ 
+body::-webkit-scrollbar-track {
+  background: rgb(50, 50, 50);  
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: rgb(100, 100, 100);  
+  border-radius: 5px;  
+} 
  
 a:link {
   color: #fff;
@@ -48,22 +62,37 @@ select, button {
 img{
   max-width:min(200px, 100%);
   max-height:min(200px, 100%);
-  border: #fff solid 1px;
+  border: #000000 solid 1px;
 }
 
-th, td {
-  padding: 10px;
+ table{
+  width: 100%;
+  float: left;
+ }
+
+ table th{
+  font-weight: normal;
+ }
+
+fieldSet{
+  padding-top: 0px;
+  padding-bottom: 0px;
+  padding-left: 20px;
+  padding-right: 20px;
+  border-radius: 10px;
+  border-width: 0px;
 }
 
- 
+tr.separateRow td {
+  padding-bottom:20px
+}
 
 .container {
   display:flex;
   flex-direction: column;  
   height: 100vh;
   max-width: 900px;   
-	margin: auto;
-  text-align: center;
+	margin: auto; 
 }
  
 .row{
@@ -104,7 +133,7 @@ th, td {
 
 #bottomRow {  
   /*flex-grow: 1*/
-  padding-top: min(5vw, 50px);
+  padding-top: min(2.5vw, 25px);
 } 
  
 #titleDiv{ 
@@ -161,10 +190,12 @@ th, td {
   flex-direction: column;
   justify-content: space-evenly;
   align-items: center; 
+  padding-top:20px; 
 }
 
 .formLabel{  
   padding-right: 10px; 
+  float:right;
 }
 .formLabel:empty
 {
@@ -189,12 +220,13 @@ th, td {
 }
 
 .formInput{ 
-  flex-grow: 1; 
+  flex-grow: 1;  
+  width: 100%;
 }
-
+ 
 .step{
   width: 100%;
-  padding-bottom:min(4vw, 50px);
+  padding-top:min(1.1vw, 15px); 
   flex-wrap: wrap;
   flex-direction: row;
   justify-content: space-around;
@@ -206,14 +238,17 @@ th, td {
     padding:min(4vw, 50px);
   } 
 }
- 
+
 .swapCard{ 
   width: 100%;
-  min-height: 100px;
-  padding: min(1.1vw, 15px);
+  min-height: 100px; 
+  margin-bottom: min(7vw, 80px);
   margin-top: min(2.4vw, 30px);
-  border: 1px solid rgb(255, 255, 255);
+  border: 1px solid rgb(0, 0, 0);
   border-radius: 10px;  
+  background-color: rgba(255, 255, 255, 0.062);
+  -webkit-box-shadow: 0px 0px 50px 0px #000000; 
+  box-shadow: 0px 0px 50px 0px #000000;
 }
 
 .swapFilter{ 
@@ -224,12 +259,15 @@ th, td {
 .swapFilter select{
   max-width: 10%; 
 }
+#profileFilter{
+  min-width: 80px;
+}
  
 
 .swapCardId{
   text-align: center;
-  font-size: 110%;
-  margin: 0px;
+  font-size: 120%; 
+  margin-top: 15px;
   margin-bottom: 15px;
 }
 
@@ -242,8 +280,8 @@ th, td {
 }
 
 .swapCardGroupSeparator{   
-  width: 1px;  
-  background: #fff;
+  width: 1px;   
+  background: rgb(0, 0, 0);
   display: flex; 
   flex-direction: column;
 }
@@ -254,8 +292,10 @@ th, td {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 10px 0px 10px;
+  padding: 0px 15px 0px 15px;
 }
+ 
+
 .swapCardGroupColumnDiv{
   width: 100%; 
   display: flex;
@@ -265,19 +305,23 @@ th, td {
 }
 
 .swapCardGroupColumnTop{ 
-  margin: 5px;
+  padding-top: 10px;
+  padding-bottom: 10px;
   margin-bottom: 10px; 
-  border-bottom: #fff solid 1px;
+  border-top: rgb(0, 0, 0) solid 1px;
+  border-bottom: rgb(0, 0, 0) solid 1px;
   justify-content: center;
+  box-shadow: 0px 8px 6px -3px rgba(0,0,0,0.2), 0px -8px 6px -3px rgba(0,0,0,0.2);
 }
 
 .swapCardGroupColumnBottom{
   display: flex;
   flex-direction: row;  
-  margin-top: 10px; 
-  padding: 10px; 
-  padding-top:16px;
-  border-top: #fff solid 1px;
+  margin-top: 10px;  
+  padding-top:15px;
+  padding-bottom:15px;
+  border-top: rgb(0, 0, 0) solid 1px;
+  box-shadow: 0px -8px 6px -3px rgba(0,0,0,0.2);
 }
 
 
@@ -292,11 +336,12 @@ th, td {
   margin-bottom: 10px;
 }
 
-.swapCardTokenText{ 
-  margin: 5px;
+.swapCardTokenText{  
   width: 100%; 
   text-align: center;
   text-decoration: none;
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
  
 .pagination{
@@ -304,8 +349,7 @@ th, td {
   display: flex;
   flex-direction: row;
   justify-content: center;
-  align-items: center;
-  margin-top: 10px;
+  align-items: center; 
   text-decoration: none;
 }
 
@@ -336,4 +380,16 @@ th, td {
   align-content: flex-start;
   flex-direction: column;
   padding-bottom: 10px;
+}
+
+.aboutSection{
+  padding-bottom: 10px;
+}
+
+.aboutGuide a, b {
+  text-decoration: underline;
+}
+
+.swapCardTokenText a, b{
+  text-decoration: none;
 }
