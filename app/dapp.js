@@ -436,7 +436,7 @@ async function refreshSwapCard(swapId){
       color = "rgb(255, 0, 175, 0.4)";
       break;
   }
-  card.style = `box-shadow: 0px 0px 30px 0px #000000, 0px 0px 10px 0px ${color}; background-color: ${color.replace("0.4", "0.02")};`;
+  card.style.cssText += `box-shadow: 0px 0px 30px 0px #000000, 0px 0px 10px 0px ${color}; background-color: ${color.replace("0.4", "0.02")};`;
 
   //card.querySelector("#swapCardTitle").innerHTML = `ID: ${swap.Id}  |  Public: ${swap.Public}  |  State: <b>${swapStateS}</b>`;
   //card.querySelector("#swapCardTitle").innerHTML = `Swap ID <b>${swap.Id}</b> is <b>${swapStateS}</b>`;
@@ -569,20 +569,20 @@ async function displayProfile(callCounter){
         }
          
         const page = Math.max(1, Math.min(pageCount, pageInt));
-        const start = (page - 1 ) * pageSize;
-        
+ 
         if(swaps.length > pageSize){ 
           profile.appendChild(createPagination(pageCount, page));
-        }
-  
-        for(var i=start; i<start + Math.min(pageSize, swaps.length); i++){
+        }        
+        const start = (page - 1 ) * pageSize;
+        const end = Math.min(start + pageSize, swaps.length); 
+        for(var i=start; i<end; i++){
           if(i >= swaps.length)
             break; 
           const swapE = await createSwapElement(swaps[i]);
           profile.appendChild(swapE);
           refreshSwapCard(swaps[i].Id);
         } 
-  
+        profile.lastElementChild.style.marginBottom = "30px";
         if(swaps.length > pageSize){ 
           profile.appendChild(createPagination(pageCount, page));
         } 

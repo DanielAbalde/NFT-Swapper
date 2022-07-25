@@ -185,7 +185,7 @@ tr.separateRow td {
 
 .formGroup{
   width: 100%;
-  margin-bottom: 3px;  
+  margin-bottom: 5px;  
   display: flex;
 }
 
@@ -245,9 +245,9 @@ tr.separateRow td {
  
 .swapCard{ 
   width: 100%;
-  min-height: 100px; 
-  margin-bottom: min(7vw, 80px);
-  margin-top: min(2.4vw, 30px);
+  min-height: 100px;  
+  margin-top: 10px;
+  margin-bottom: 60px;
   border: 1px solid rgb(0, 0, 0);
   border-radius: 10px;  
   background-color: rgba(255, 255, 255, 0.062);
@@ -354,7 +354,7 @@ tr.separateRow td {
   flex-direction: row;
   justify-content: center;
   align-items: center; 
-  text-decoration: none;
+  text-decoration: none; 
 }
 
 .pagination a { 
