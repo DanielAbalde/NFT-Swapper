@@ -12,20 +12,20 @@
   </head>
   <body>
     <div class="container">
-      <div id="topRow" class="row">
-        <a id="titleLink" href="index.html"></a>
-          <div id="titleDiv" class="topCol">
+      <div id="topRow" class="row"> 
+        <div id="titleDiv" class="topCol">
+          <a id="titleLink" href="index.html"> 
             <h1 id="title">NFT Swapper</h1>
             <h7 id="subtitle">Peer to peer exchange of multiple NFT</h7>
-          </div>
-        </a> 
+          </a> 
+        </div> 
         <div id="topNav" class="topCol">
           <a class="topNavLink" href="?view=register">New Swap</a>
           <a class="topNavLink" href="?view=profile">My Swaps</a> 
           <a class="topNavLink" href="?view=about">About</a>
         </div> 
       </div>
-      <div id="bottomRow" class="row">
+      <div id="middleRow" class="row">
         <div id="connect" class="step row">
           <div id="chain" class="connectStep column">
             <form action="" class="botCol">
@@ -54,7 +54,7 @@
                 <th><button id="connectButton" onclick="connectButtonClicked()">Connect</button></th>
               </tr>
               <tr>
-                <th><a id="connectLabel" ondblclick="copyText('connectLabel')" title="Double click to copy" target="_blank">No address</a></th>
+                <th><a id="connectLabel" ondblclick="copyText('connectLabel')" title="Double click to copy" target="_blank">No wallet connected 🔒</a></th>
               </tr>
             </table> 
            
@@ -95,7 +95,7 @@
               <tr><th style="color:rgb(50, 50, 50)">.</th></tr>
               <tr>
                 <th style="width: 15%;"><label for="publicSwap" class="formLabel">Public</label></th>
-                <th><select name="publicSwap" id="publicSwap" class="formInput" title="Uncheck to keep this swap only accesible by owner A and owner B, otherwise is public and can be view by everyone">
+                <th><select name="publicSwap" id="publicSwap" class="formInput" title="Set false to keep this swap only accesible by owner A and owner B, otherwise is public and can be seen by anyone">
                   <option value="True">True</option>
                   <option value="False">False</option>
                 </select></th>
@@ -144,48 +144,53 @@
         </div>
         <div id="about" class="step" style="display:none;">
           <h2>About</h1>
-        <br>
-        Peer to peer exchange of multiple NFTs for EVM chains.
-        <br> <br> <br> 
+          <br> <br>Peer to peer exchange of multiple NFTs for EVM chains.
+          <br> <br>When you want to exchange one or more NFTs with another person, so that you give them yours in exchange for them giving you theirs, the first person to send them needs to trust that the second person will do so as well. NFT Swapper solves this problem by using the contract as an intermediary, so that you can only claim each other's NFTs when you have both deposited yours.
+          <br> <br>The contracts listed here do not charge any commission, they are free to use. They also have no owner or administration mechanisms so everything is controlled by the user.
+        
+          <div id="guide" class="aboutSection">
+            <h3>Guide 🗺️</h3>
+            <div id="aboutGuide"> 
 
-        <div class="aboutSection">
-          <h3>Guide 🗺️</h3>
-          <div id="aboutGuide"> 
-
-            <ol type="1">
-              <li>Create a <a href="?view=register#register"><b>new swap agreement</b></a> by registering owners, NFT contract addresses and the token IDs.</li>
-              <br>
-              <li>Owners of NFTs must <a href="?view=register#aprove"><b>approve</b></a> as operator the Swapper contract address on the NFT contracts.</li>
-              <br>
-              <li>Both owners have to <a href="?view=profile&page=-1"><b>deposit</b></a> their NFTs in the swap agreement.</li>
-              <br>
-              <li>One owner can <a href="?view=profile&page=-1"><b>claim</b></a> the swap and both receive the other's NFTs.</li>
-              <br>
-            </ol>  
+              <ol type="1">
+                <li>Create a <a href="?view=register#register"><b>new swap agreement</b></a> by registering owners, NFT contract addresses and the token IDs.</li>
+                <br>
+                <li>Owners of NFTs must <a href="?view=register#aprove"><b>approve</b></a> as operator the Swapper contract address on the NFT contracts.</li>
+                <br>
+                <li>Both owners have to <a href="?view=profile&page=-1"><b>deposit</b></a> their NFTs in the swap agreement.</li>
+                <br>
+                <li>One owner can <a href="?view=profile&page=-1"><b>claim</b></a> the swap and both receive the other's NFTs.</li>
+                <br>
+              </ol>  
+            </div>
           </div>
-        </div>
-        <div class="aboutSection">
-          <h3>Contract Addresses 🔑</h3>
-          <div id="aboutContracts"></div>
-        </div>
-        <div class="aboutSection aboutGuide">
-          <h3>Contribute ☕</h3>
-          <ul>
-            <li>Issues and Pull Request on <a href="https://github.com/DanielAbalde/NFT-Swapper" target="_blank">Github</a> are welcome.</li>
-            <li>Let me know if you deploy the contracts on a different EVM blockchain.</li>
-            <li>Buy me a coffee at 0x4443049b49Caf8Eb4E9235aA1Efe38FcFA0055a1</li>
-            <li>Share it on social media!</li>
-          </ul>
-        </div>
-        <div class="aboutSection">
-          <h3>Contact ✉️</h3>
-          <ul>
-            <li><a href="https://www.twitter.com/DGANFT"><i class="fab fa-twitter"></i> @DGANFT</a></li>
-            <li><a href="https://discord.gg/H4WMdnz5nw"><i class="fab fa-discord"></i> DaniGA#9856</a></li>
-          </ul>
-        </div>
+          <div id="contracts" class="aboutSection">
+            <h3>Contract Addresses 🔑</h3>
+            <div id="aboutContracts"></div>
+          </div>
+          <div id="contibute" class="aboutSection aboutGuide">
+            <h3>Contribute ☕</h3>
+            <ul>
+              <li>Issues and Pull Request on <a href="https://github.com/DanielAbalde/NFT-Swapper" target="_blank">Github</a> are welcome.</li>
+              <li>Let me know if you deploy the contracts on a different EVM blockchain.</li>
+              <li>Buy me a coffee at 0x4443049b49Caf8Eb4E9235aA1Efe38FcFA0055a1</li>
+              <li>Share it on social media!</li>
+            </ul>
+          </div>
+          <div id="contact" class="aboutSection">
+            <h3>Contact ✉️</h3>
+            <ul>
+              <li><a href="https://www.twitter.com/DGANFT"><i class="fab fa-twitter"> </i> @DGANFT</a></li>
+              <li><a href="https://discord.gg/H4WMdnz5nw"><i class="fab fa-discord"> </i> DaniGA#9856</a></li>
+            </ul>
+          </div>
         </div> 
       </div> 
+      <div id="bottomRow">
+        <div id="footer" class="footer">
+          Developed by <a href="https://linktr.ee/danielabalde" target="_blank">Daniel Abalde</a>. Licensed under <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank">GNUv3</a>.  
+        </div> 
+      </div>
       <div id="connectToAccess"></div>    
     </div> 
       <div id="loadingSplash" style="min-width: 100%; min-height: 100%; z-index: 9999; position: absolute; top:0; left:0; display:none">
@@ -205,7 +210,8 @@
         </rect>
       
       </svg>
-    </div>
+    </div> 
+ 
     <script src="dapp.js" defer></script>
       <!--https://github.com/tholman/github-corners-->
       <a href="https://github.com/DanielAbalde/NFT-Swapper" target="_blank" class="github-corner" aria-label="View source on GitHub" style="z-index: 100;">
@@ -214,5 +220,7 @@
           <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
           <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
           <style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+
   </body>
 </html>

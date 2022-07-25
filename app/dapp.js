@@ -1,5 +1,4 @@
-
-let debug = false;
+let debug = true;
 let contracts, provider, signer, signerAddress, connected, networkId, scanner, swapperAddress, contractURL, signerURL, nftAbi, swapperAbi, platform;
 let swapperContract = undefined;
 let waiting = false;
@@ -26,16 +25,18 @@ window.onload = async function(){
       if(connected){
         switchNetwork();
       }
-      refreshConnectButton(); 
+      refreshConnectButton();  
       const {name} = await provider.getNetwork();
       console.log(`Connected ${signerAddress} on ${name}`);
+
     } else {
       console.log("Not connected");
     }
   });
 
   await selectSwapperContract({id: "init"});
- 
+  if(connected)
+  
   document.getElementById("approve").style.display = "none";
   document.getElementById("register").style.display = "none";
   document.getElementById("profile").style.display = "none";
@@ -90,7 +91,7 @@ window.onload = async function(){
   }
 
 }
- 
+
 function initVariables(){
 
 }
@@ -175,7 +176,7 @@ const isMetaMaskConnected = async () => {
   const accounts = await provider.listAccounts();
   return accounts.length > 0;
 }
- 
+
 // ##########################
  
 async function OnSwapStateChanged(swapId, state){
@@ -221,7 +222,7 @@ async function connectButtonClicked(){
 
 function refreshConnectButton(){
   document.getElementById("connectButton").innerHTML = connected ? 'Connected' : 'Connect';
-  document.getElementById("connectLabel").innerHTML = connected ? signerAddress : "No address";
+  document.getElementById("connectLabel").innerHTML = connected ? signerAddress : "No wallet connected 🔒";
   document.getElementById("connectToAccess").innerHTML = connected ? "" : "Connect to access. 🔑";
 }
 
@@ -489,19 +490,20 @@ function displayLoading(show){
 // ##########################
  
 
-async function displayProfile(){
+async function displayProfile(callCounter){
   try{
     const profile = document.getElementById("profile");
     const swapperContract = getSwapperContract();
     if(connected && swapperContract !== undefined){  
-      const swaps = [];
+      const swaps = []; 
       try{
         const swapCount = await swapperContract.getSwapCount(); 
         const count = swapCount.toNumber();  
         const filter = document.getElementById("profileFilter").value;
+        var counter = 0;
         for(var i=1; i<=count; i++){ 
           try{
-            const swap = await swapperContract.getSwap(i); 
+            const swap = await swapperContract.getSwap(i);  
             if(swap.OwnerA !== signerAddress && swap.OwnerB !== signerAddress)
               continue; 
             if(filter === "All"){
@@ -511,15 +513,36 @@ async function displayProfile(){
                 swaps.push(swap);
               }
             } 
+            counter = 0; 
+
           }catch(e){
-            console.error("Error getting swap ", i, {e});
+            if(counter < 10){
+              i -= 1;
+              counter++;
+            }else{
+              console.error("Unable to load swap ", i, {e});
+              swaps.push(i);
+            }
+         
+            
           } 
         }  
       }catch(e){
         console.error("Error getting swap count", {e});
+        if(typeof callCounter === "undefined"){
+          callCounter = 0;
+        }
+        if(callCounter < 10){
+          setTimeout(() => {
+            displayProfile(callCounter + 1);
+          }, 1000);
+        }else{
+          return;
+        }
       }
        
       profile.querySelector("#loadingSwaps").style.display = "none";
+   
       if(profile.childNodes.length >= 5){
         for(var i=profile.childNodes.length-1; i>=5; i--){
           if(profile.childNodes[i].nodeName === "DIV"){
@@ -531,6 +554,7 @@ async function displayProfile(){
         const div = document.createElement("div");
         div.className = "swapCard";
         div.innerHTML = "No swaps found";
+        div.style = "display:flex; text-align: center; align-items: center; justify-content: center;";
         profile.appendChild(div);
       }else{ 
         const pageSize = 5;
@@ -553,7 +577,7 @@ async function displayProfile(){
   
         for(var i=start; i<start + Math.min(pageSize, swaps.length); i++){
           if(i >= swaps.length)
-            break;
+            break; 
           const swapE = await createSwapElement(swaps[i]);
           profile.appendChild(swapE);
           refreshSwapCard(swaps[i].Id);
@@ -567,6 +591,7 @@ async function displayProfile(){
       profile.innerHTML="No connected";
     }
  
+
   }catch(error){
     console.error({error});
   }
@@ -602,7 +627,14 @@ function createPagination(pageCount, page){
 }
 
 async function createSwapElement(swap){  
-
+  if(typeof swap === "number"){
+    const divErr = document.createElement("div");
+    divErr.className = "swapCard";
+    divErr.swapId = swap; 
+    divErr.id = `swapCard${swap}`;
+    divErr.innerHTML = `Failed to load swap ${swap}`;
+    return divErr;
+  }
   const stateIndex = getState(swap);
   const swapState = translateState(stateIndex);
   const swapStateE = translateStateWithEmoji(stateIndex);
