@@ -131,8 +131,8 @@ async function selectSwapperContract(e){
   platform = contracts[chain].platform;
   swapperAbi = contracts[chain].NFT[nftElement.value].abiSwapper;
   swapperAddress = contracts[chain].NFT[nftElement.value].contract;
-  contractURL = `https:/${scanner}/address/${swapperAddress}#code`;
-  signerURL = `https:/${scanner}/address/${signerAddress}`;
+  contractURL = `https://${scanner}/address/${swapperAddress}#code`;
+  signerURL = `https://${scanner}/address/${signerAddress}`;
   nftAbi = contracts[chain].NFT[nftElement.value].abiNFT;  
 
   document.getElementById("contractURL").href = contractURL;
