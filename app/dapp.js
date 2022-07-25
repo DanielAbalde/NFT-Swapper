@@ -41,19 +41,22 @@ window.onload = async function(){
   document.getElementById("register").style.display = "none";
   document.getElementById("profile").style.display = "none";
   document.getElementById("about").style.display = "none";
-  if(connected){ 
-    const url = new URL(window.location.href);
-    const view = url.searchParams.get("view") || "register";
+
+  const url = new URL(window.location.href);
+  const view = url.searchParams.get("view") || "register";
+
+  if(connected){  
     if(view == "register"){
       document.getElementById("approve").style.display = "block";
       document.getElementById("register").style.display = "block";
     }else if(view == "profile"){
       document.getElementById("profile").style.display = "block";
       displayProfile();
-    }else if(view == "about"){
-      document.getElementById("about").style.display = "block";
-      createAboutPage();
     }
+  }
+  if(view == "about"){
+    document.getElementById("about").style.display = "block";
+    createAboutPage();
   }
  
   if(debug){
