@@ -18,6 +18,9 @@ window.onload = async function(){
   }
 
   await isMetaMaskConnected().then(async (isConnected) => {
+
+    initVariables();
+
     if (isConnected) {
       signer = await provider.getSigner(0); 
       signerAddress = await signer.getAddress();
@@ -25,7 +28,8 @@ window.onload = async function(){
       /*if(connected){
         switchNetwork();
       }*/
-      refreshConnectButton();  
+      
+      updateVariables();
 
       const {name} = await provider.getNetwork();
       console.log(`Connected ${signerAddress} on ${name}`);
@@ -35,11 +39,8 @@ window.onload = async function(){
     }
   });
 
-  initVariables();
 
-  //await selectSwapperContract({id: "init"});
 
- 
   if(debug){
     const sample = 2;
     switch(sample){
@@ -74,6 +75,21 @@ window.onload = async function(){
 
   }
 
+}
+
+function updateURL(_view, _chain, _nft){
+  
+  const url = new URL(window.location.href);
+
+  const view = _view || getURLValue(url, "view", "register"); 
+  const chain = _chain || getURLValue(url, "chain", "Polygon");
+  const nft = _nft || getURLValue(url, "nft", "ERC721");
+
+  const state = {"view":view,"chain":chain, "nft":nft};
+  const urlPath = `?view=${view}&chain=${chain}&nft=${nft}`;  
+  window.history.pushState(state, "", urlPath);
+  
+  updateVariables();
 }
 
 function initVariables(){
@@ -137,6 +153,15 @@ function updateVariables(){
   signerURL = `https://${scanner}/address/${signerAddress}`;
   nftAbi = contracts[chain].NFT[nft].abiNFT;
 
+  updatePage();
+}
+
+async function updatePage(){
+  
+  document.getElementById("connectButton").innerHTML = connected ? 'Connected' : 'Connect';
+  document.getElementById("connectLabel").innerHTML = connected ? signerAddress : "No wallet connected 🔒";
+  document.getElementById("connectToAccess").innerHTML = connected ? "" : "Connect to access. 🔑";
+
   document.getElementById("contractURL").href = contractURL;
   document.getElementById("connectLabel").href = signerURL; 
 
@@ -158,6 +183,8 @@ function updateVariables(){
       document.getElementById("profile").style.display = "block";
       displayProfile();
     }
+
+    await switchNetwork();
   }
 
   if(view == "about"){
@@ -166,38 +193,14 @@ function updateVariables(){
   }
 }
 
-
-function updateURL(_view, _chain, _nft){
-  
-  const url = new URL(window.location.href);
-
-  const view = _view || getValue(url, "view", "register"); 
-  const chain = _chain || getValue(url, "chain", "Polygon");
-  const nft = _nft || getValue(url, "nft", "ERC721");
-
-  const state = {"view":view,"chain":chain, "nft":nft};
-  const urlPath = `?view=${view}&chain=${chain}&nft=${nft}`;  
-  window.history.pushState(state, "", urlPath);
-  console.log(urlPath);
-  updateVariables();
-
-  function getValue(url, name, defValue){
-    const value = url.searchParams.get(name); 
-    if(value !== null && value !== "null"){ 
-      return value;
-    } else {
-      return defValue;
-    }
-  }
-
-}
-
 async function switchNetwork(){ 
-  if(provider){
-    if(networkId === undefined)
+  if(provider){  
+    if(networkId === undefined){
       networkId = contracts[document.getElementById("chains").value].id;
+    }
+     
     const { chainId } = await provider.getNetwork();
-
+    console.log(`chainId: ${chainId}, networkId: ${networkId}`);
     if(networkId !== chainId){  
       try {  
         await ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: `0x${Number(networkId).toString(16)}` }], }); 
@@ -256,10 +259,12 @@ async function connectButtonClicked(){
       signer = await provider.getSigner(0); 
       signerAddress = await signer.getAddress();
       connected = signer !== null;
+      updatePage(); 
+
       if(connected){
         switchNetwork();
       }
-      refreshConnectButton(); 
+     
     } catch (error) {
       alertError(error);
     }
@@ -273,13 +278,7 @@ async function connectButtonClicked(){
   } 
 
 }
-
-function refreshConnectButton(){
-  document.getElementById("connectButton").innerHTML = connected ? 'Connected' : 'Connect';
-  document.getElementById("connectLabel").innerHTML = connected ? signerAddress : "No wallet connected 🔒";
-  document.getElementById("connectToAccess").innerHTML = connected ? "" : "Connect to access. 🔑";
-}
-
+ 
 async function approveButtonClicked(e){ 
 
   if(!connected){
@@ -654,17 +653,19 @@ async function displayProfile(callCounter){
 
 function createPagination(pageCount, page){
  
+  const url = new URL(window.location.href).search;
+  const startUrl = url || "?view=profile";
   const div = document.createElement("div");
   div.className = "pagination";
   const a0 = document.createElement("a");
-  a0.href = `?view=profile&page=${page-1}`;
+  a0.href = `${startUrl}&page=${page-1}`;
   a0.innerHTML = "&lt;";
   if(page <= 1)
     a0.style = "pointer-events:none;";
   div.appendChild(a0);
   for(var i=0; i<pageCount; i++){
     const a = document.createElement("a");
-    a.href = `?view=profile&page=${i+1}`;
+    a.href = `${startUrl}&page=${i+1}`;
     a.innerHTML = `${i+1}`;
     if(i == page-1){
       a.style = "font-weight:bold; text-decoration:underline;";
@@ -672,7 +673,7 @@ function createPagination(pageCount, page){
     div.appendChild(a);
   }
   const a1 = document.createElement("a");
-  a1.href = `?view=profile&page=${page+1}`;
+  a1.href = `${startUrl}&page=${page+1}`;
   a1.innerHTML = "&gt;";
   if(page >= pageCount)
     a1.style = "pointer-events:none;";
@@ -951,4 +952,13 @@ function alertError(error){
     console.error(error);
   }
  
+}
+ 
+function getURLValue(url, name, defValue){
+  const value = url.searchParams.get(name); 
+  if(value !== null && value !== "null"){ 
+    return value;
+  } else {
+    return defValue;
+  }
 }
