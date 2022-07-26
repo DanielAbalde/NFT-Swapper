@@ -1,52 +1,35 @@
-<h1 align="center"> NFT Swapper (WIP)</h1> 
-<p align="center">Peer to peer exchange of multiple NFT</p>
-
-
-
-## 😎 Overview
-
-Most NFT platforms allow you to sell and auction NFTs using cryptos, but they do not yet allow you to exchange them for other NFTs. When you want to exchange more than one, you currently need to trust even more with the other participant to fulfill the deal. These contracts solve this problem by acting as an trustless intermediary that escrows and exchanges the NFTs when both parties have deposited their part of the agreement. Official implementations have no owner or admin accounts so all activity is self sovereign.
-
-ERC 721:
-
-Polygon contract: [WIP]()
-
-Mumbai contract: [0x68fE05bA6C9bd7d43FF255f4D90D8508a605dBfa](https://mumbai.polygonscan.com/address/0x68fE05bA6C9bd7d43FF255f4D90D8508a605dBfa#code)
-
-## 📖 Usage
-Although the procedure is simple (1. approve as an operator in the NFT contracts, 2. register a new swap, 3. deposit the NFTs by both parties and 4. claim to complete the exchange), it becomes a bit tedious due to the lack of a user-friendly front-end or GUI.
-
-1. **Approve as operator**. Owners need to give this contract (addresses listed above) permissions to transfer their NFTs from the NFT contracts they want to swap. If the NFT contract is verified you can do it yourself from any method to give transfer permissions (like setApprovalForAll).
-![Approve](./imgs/approve.PNG)
-
-2. **Register a new swap**. You can register a new swap by sending a transaction to the contract. The contract will create a new swap with the given parameters.
-  2. 1. Visit one of the above links according to the blockchain you want to use.
-  2. 2. In Contract > Write Contract > Connect to Web3.
-    ![Connect to Web3](./imgs/ConnectToWeb3.PNG)
-  2. 3. Go to `register` section to create a new on-chain swap agreement, in which the tokenIdsA of the nftAddressesA contracts owned by ownerA will be exchanged for the tokenIdsB of the nftAddressesB contracts owned by ownerB. Press `Write`, sign the transaction and wait for it to finish.
-![Register new swap](./imgs/RegisterNewSwap.PNG)
-  2. 4. Get the `swapId` of the new swap agreement. You can use the `getSwaps` method located in Read Contract to get your last swapId by introducing your address. Another way is open the transaction in the Transaction tab and get it from the Logs.
-![Get swapId](./imgs/SwapId.PNG)
-
-
-3. **Deposit NFTs**. Both parties deposit NFTs (or one of them cancels the exchange).
-4. **Claim swapped NFTs**. Both parties claim the NFTs.
-
-## 🔎 Disclaimer
-
-Use these contracts at your own risk. If you use these contracts you agree that you are legally responsible for any results. The contracts do not have admin mechanisms neither an owner, so only the participants of an exchange have the power to cancel, deposit and claim it. Be sure to use the official contract addresses listed in this document.
-
-
-## ☕ Contribute  
-
-Feel free to open an Issue or Pull Request! 
-
-Let me know if you deploy the contract in other networks to list them here.
-
-Give credit if you use these contracts in your project.
+<h3 align="center">NFT SWAPPER</h3> 
+<p align="center">Peer to peer exchange of multiple NFTs for EVM chains</p>
  
-My address to thank me: daniga.eth or 0x4443049b49caf8eb4e9235aa1efe38fcfa0055a1.
 
-We can talk about NFT development on my [Discord](https://discord.gg/QPMapnqAh7).
 
-Follow me on Twitter [@DGANFT](https://twitter.com/DGANFT)!
+When you want to exchange one or more NFTs with another person, so that you give them yours in exchange for them giving you theirs, the first person to send them needs to trust that the second person will do so as well. NFT Swapper solves this problem by using the contract as an intermediary, so that you can only claim each other's NFTs when you have both deposited yours.
+
+The contracts listed here do not charge any commission, they are free to use. They also have no owner or administration mechanisms so everything is controlled by the user.
+
+### Guide 🗺️ (WIP)
+* Create a new swap agreement by registering owners, NFT contract addresses and the token IDs.
+* Owners of NFTs must approve as operator the Swapper contract address on the NFT contracts.
+* Both owners have to deposit their NFTs in the swap agreement.
+* One owner can claim the swap and both receive the other's NFTs.
+
+### Contract Addresses 🔑
+
+| Chain	| ERC721 |
+|:-------:|:-------:|
+| Polygon	| [0xe1600C43b7113b5Eb18d6B2F4f5d4189Ad27F9b0](https://polygonscan.com/address/0xe1600C43b7113b5Eb18d6B2F4f5d4189Ad27F9b0) |
+| Mumbai	| [0xEd1D7d05d79AB4F980FBAB452bCD4da365a66548](https://mumbai.polygonscan.com/address/0xEd1D7d05d79AB4F980FBAB452bCD4da365a66548) |
+
+
+### Contribute ☕
+* Issues and Pull Request on Github are welcome.
+* Let me know if you deploy the contracts on a different EVM blockchain.
+* Buy me a coffee at 0x4443049b49Caf8Eb4E9235aA1Efe38FcFA0055a1
+* Share it on social media!
+
+### Contact ✉️
+ * Twitter: [@DGANFT](https://twitter.com/DGANFT)
+ * Discord: [DaniGA#9856](https://discord.com/invite/H4WMdnz5nw)
+
+### License ♻️
+  * [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.html)
