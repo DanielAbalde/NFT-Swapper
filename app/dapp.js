@@ -804,7 +804,7 @@ function createAboutPage(){
   th3.innerHTML = "ERC1155";
   tr.appendChild(th1);
   tr.appendChild(th2);
-  tr.appendChild(th3);
+  //tr.appendChild(th3);
   thead.appendChild(tr);
  
   const tbody = document.createElement("tbody");

@@ -2,7 +2,7 @@ require('dotenv').config();
 
 async function main() {
 
-  const [deployer] = await ethers.getSigners(); 
+  const [deployer] = await ethers.getSigners(1); 
   const wallet = ethers.Wallet.fromMnemonic(process.env.MNEMONIC);
 	console.log("Signer:", deployer.address, ", balance: ", (await deployer.getBalance()).toString());
   console.log("Wallet:", wallet.address);
