@@ -1,4 +1,4 @@
-let debug = false;
+let debug = true;
 let contracts, provider, signer, signerAddress, connected, networkId, scanner, swapperAddress, contractURL, signerURL, nftAbi, swapperAbi, platform;
 let swapperContract = undefined;
 let waiting = false;
@@ -22,10 +22,11 @@ window.onload = async function(){
       signer = await provider.getSigner(0); 
       signerAddress = await signer.getAddress();
       connected = signer !== null;
-      if(connected){
+      /*if(connected){
         switchNetwork();
-      }
+      }*/
       refreshConnectButton();  
+
       const {name} = await provider.getNetwork();
       console.log(`Connected ${signerAddress} on ${name}`);
 
@@ -34,30 +35,10 @@ window.onload = async function(){
     }
   });
 
-  await selectSwapperContract({id: "init"});
-  if(connected)
-  
-  document.getElementById("approve").style.display = "none";
-  document.getElementById("register").style.display = "none";
-  document.getElementById("profile").style.display = "none";
-  document.getElementById("about").style.display = "none";
+  initVariables();
 
-  const url = new URL(window.location.href);
-  const view = url.searchParams.get("view") || "register";
+  //await selectSwapperContract({id: "init"});
 
-  if(connected){  
-    if(view == "register"){
-      document.getElementById("approve").style.display = "block";
-      document.getElementById("register").style.display = "block";
-    }else if(view == "profile"){
-      document.getElementById("profile").style.display = "block";
-      displayProfile();
-    }
-  }
-  if(view == "about"){
-    document.getElementById("about").style.display = "block";
-    createAboutPage();
-  }
  
   if(debug){
     const sample = 2;
@@ -96,50 +77,119 @@ window.onload = async function(){
 }
 
 function initVariables(){
+  const url = new URL(window.location.href);
 
-}
-async function selectSwapperContract(e){
+  let chain = Object.keys(contracts)[0]; 
+  const chainURL = url.searchParams.get("chain");
+  if(chainURL !== null){
+    if(chainURL.toLowerCase() === "mumbai" || chainURL === "80001"){
+      chain = "Mumbai"; 
+    } else if(chainURL.toLowerCase() === "polygon" || chainURL === "137"){
+      chain = "Polygon"; 
+    }  
+  } 
   const chainElement = document.getElementById("chains");
-  const chain = chainElement.value;
-  if(e.id == "init"){  
-      Array.from(chainElement).forEach((option) => {
-          chainElement.removeChild(option)
-      });
-      for (const key of Object.keys(contracts)) { 
-          var opt = document.createElement('option');
-          opt.value = key;
-          opt.innerHTML = key;
-          chainElement.appendChild(opt);
-      }
-      chainElement.value = chain;
-      e.id = "chains";
+  Array.from(chainElement).forEach((option) => {
+    chainElement.removeChild(option);
+  });
+  for (const key of Object.keys(contracts)) { 
+    var opt = document.createElement('option');
+    opt.value = key;
+    opt.innerHTML = key;
+    chainElement.appendChild(opt);
   }
+  chainElement.value = chain;
+
+  let nft = Object.keys(contracts[chain].NFT)[0];
+  const nftURL = url.searchParams.get("nft");
+  if(nftURL !== null){
+    if(nftURL.toLowerCase() === "erc721" || nftURL === "721"){
+      nft = "ERC721"; 
+    } else if(nftURL.toLowerCase() === "erc1155" || nftURL === "1155"){
+      nft = "ERC1155"; 
+    }  
+  } 
   const nftElement = document.getElementById('nfttype');
-  if(e.id == "chains"){  
-      Array.from(nftElement).forEach((option) => {
-          nftElement.removeChild(option)
-      });
-      for (const key of Object.keys(contracts[chain].NFT)) {
-          var opt = document.createElement('option');
-          opt.value = key;
-          opt.innerHTML = key;
-          nftElement.appendChild(opt);
-      }
-  }  
+  Array.from(nftElement).forEach((option) => {
+    nftElement.removeChild(option);
+  });
+  for (const key of Object.keys(contracts[chain].NFT)) {
+    var opt = document.createElement('option');
+    opt.value = key;
+    opt.innerHTML = key;
+    nftElement.appendChild(opt);
+  }
+
+  updateVariables();
+} 
+
+function updateVariables(){
+ 
+  const chain = document.getElementById("chains").value;
+  const nft = document.getElementById('nfttype').value;
+
   networkId = contracts[chain].id;
-  scanner = contracts[chain].scanner; 
+  scanner = contracts[chain].scanner;
   platform = contracts[chain].platform;
-  swapperAbi = contracts[chain].NFT[nftElement.value].abiSwapper;
-  swapperAddress = contracts[chain].NFT[nftElement.value].contract;
+  swapperAbi = contracts[chain].NFT[nft].abiSwapper;
+  swapperAddress = contracts[chain].NFT[nft].contract;
   contractURL = `https://${scanner}/address/${swapperAddress}#code`;
   signerURL = `https://${scanner}/address/${signerAddress}`;
-  nftAbi = contracts[chain].NFT[nftElement.value].abiNFT;  
+  nftAbi = contracts[chain].NFT[nft].abiNFT;
 
   document.getElementById("contractURL").href = contractURL;
   document.getElementById("connectLabel").href = signerURL; 
-  if(e.id === "init")
-  await switchNetwork(); 
- 
+
+  
+  if(connected) 
+    document.getElementById("approve").style.display = "none";
+  document.getElementById("register").style.display = "none";
+  document.getElementById("profile").style.display = "none";
+  document.getElementById("about").style.display = "none";
+
+  const url = new URL(window.location.href);
+  const view = url.searchParams.get("view") || "register";
+
+  if(connected){  
+    if(view == "register"){
+      document.getElementById("approve").style.display = "block";
+      document.getElementById("register").style.display = "block";
+    }else if(view == "profile"){
+      document.getElementById("profile").style.display = "block";
+      displayProfile();
+    }
+  }
+
+  if(view == "about"){
+    document.getElementById("about").style.display = "block";
+    createAboutPage();
+  }
+}
+
+
+function updateURL(_view, _chain, _nft){
+  
+  const url = new URL(window.location.href);
+
+  const view = _view || getValue(url, "view", "register"); 
+  const chain = _chain || getValue(url, "chain", "Polygon");
+  const nft = _nft || getValue(url, "nft", "ERC721");
+
+  const state = {"view":view,"chain":chain, "nft":nft};
+  const urlPath = `?view=${view}&chain=${chain}&nft=${nft}`;  
+  window.history.pushState(state, "", urlPath);
+  console.log(urlPath);
+  updateVariables();
+
+  function getValue(url, name, defValue){
+    const value = url.searchParams.get(name); 
+    if(value !== null && value !== "null"){ 
+      return value;
+    } else {
+      return defValue;
+    }
+  }
+
 }
 
 async function switchNetwork(){ 
@@ -147,6 +197,7 @@ async function switchNetwork(){
     if(networkId === undefined)
       networkId = contracts[document.getElementById("chains").value].id;
     const { chainId } = await provider.getNetwork();
+
     if(networkId !== chainId){  
       try {  
         await ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: `0x${Number(networkId).toString(16)}` }], }); 
@@ -280,7 +331,7 @@ async function registerButtonClicked(){
       }
       return "";
     }
-    else if(id.startsWith("tokensIds")){
+    else if(id.startsWith("tokenIds")){
       var value = document.getElementById(id).value;
       if(value !== undefined){
         return value.replace(/\s/g, '').split(",");
@@ -291,10 +342,10 @@ async function registerButtonClicked(){
 
   const ownerA = getValue("ownerA");
   const nftAddressesA = getValue("nftAddressesA");
-  const tokenIdsA = getValue("tokensIdsA");
+  const tokenIdsA = getValue("tokenIdsA");
   const ownerB = getValue("ownerB") || ethers.constants.AddressZero;
   const nftAddressesB = getValue("nftAddressesB");
-  const tokenIdsB = getValue("tokensIdsB");
+  const tokenIdsB = getValue("tokenIdsB");
   const public = document.getElementById("publicSwap").value;
 
   //if ownerB == 0 then it is a public swap.0

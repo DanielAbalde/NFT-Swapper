@@ -24,9 +24,9 @@
           </a> 
         </div> 
         <div id="topNav" class="topCol">
-          <a class="topNavLink" href="?view=register">New Swap</a>
-          <a class="topNavLink" href="?view=profile">My Swaps</a> 
-          <a class="topNavLink" href="?view=about">About</a>
+          <a class="topNavLink" onclick="updateURL('register', undefined, undefined);">New Swap</a>
+          <a class="topNavLink" onclick="updateURL('profile', undefined, undefined);">My Swaps</a> 
+          <a class="topNavLink" onclick="updateURL('about', undefined, undefined);">About</a>
         </div> 
       </div>
       <div id="middleRow" class="row">
@@ -36,13 +36,13 @@
               <table>
                 <tr>
                   <th style="width: 50%;"><label class="formLabel" >Chain</label></th>
-                  <th><select id="chains" name="chains" class="formInput" onchange="selectSwapperContract(this)">
+                  <th><select id="chains" name="chains" class="formInput" onchange="updateURL(undefined, this.value, undefined);">
                     <option value="Polygon">Polygon</option> 
                   </select></th>
                 </tr>
                 <tr>
                   <th style="width: 50%;"><label class="formLabel" >Standard</label></th>
-                  <th><select id="nfttype" name="nfttype" class="formInput" onchange="selectSwapperContract(this)">
+                  <th><select id="nfttype" name="nfttype" class="formInput" onchange="updateURL(undefined, undefined, this.value);">
                     <option value="ERC721">ERC721</option>
                   </select></th>
                 </tr>
