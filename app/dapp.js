@@ -29,17 +29,16 @@ window.onload = async function(){
         switchNetwork();
       }*/
       
-      updateVariables();
-
       const {name} = await provider.getNetwork();
       console.log(`Connected ${signerAddress} on ${name}`);
+      
+      updateVariables(); 
+      updatePage();
 
     } else {
       console.log("Not connected");
     }
   });
-
-
 
   if(debug){
     const sample = 2;
@@ -90,6 +89,7 @@ function updateURL(_view, _chain, _nft){
   window.history.pushState(state, "", urlPath);
   
   updateVariables();
+  updatePage();
 }
 
 function initVariables(){
@@ -153,7 +153,6 @@ function updateVariables(){
   signerURL = `https://${scanner}/address/${signerAddress}`;
   nftAbi = contracts[chain].NFT[nft].abiNFT;
 
-  updatePage();
 }
 
 async function updatePage(){
@@ -198,9 +197,7 @@ async function switchNetwork(){
     if(networkId === undefined){
       networkId = contracts[document.getElementById("chains").value].id;
     }
-     
     const { chainId } = await provider.getNetwork();
-    console.log(`chainId: ${chainId}, networkId: ${networkId}`);
     if(networkId !== chainId){  
       try {  
         await ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: `0x${Number(networkId).toString(16)}` }], }); 
@@ -544,6 +541,7 @@ function displayLoading(show){
  
 
 async function displayProfile(callCounter){
+  const errorTimes = 5;
   try{
     const profile = document.getElementById("profile");
     const swapperContract = getSwapperContract();
@@ -569,9 +567,10 @@ async function displayProfile(callCounter){
             counter = 0; 
 
           }catch(e){
-            if(counter < 10){
+            if(counter < errorTimes){
               i -= 1;
               counter++;
+              console.error(`Error loading swap ${i}, try ${counter} of ${errorTimes}`);
             }else{
               console.error("Unable to load swap ", i, {e});
               swaps.push(i);
@@ -585,7 +584,7 @@ async function displayProfile(callCounter){
         if(typeof callCounter === "undefined"){
           callCounter = 0;
         }
-        if(callCounter < 10){
+        if(callCounter < errorTimes){
           setTimeout(() => {
             displayProfile(callCounter + 1);
           }, 1000);
@@ -641,7 +640,7 @@ async function displayProfile(callCounter){
         } 
       } 
     }else{
-      profile.innerHTML="No connected";
+      profile.innerHTML = "No connected";
     }
  
 
@@ -652,28 +651,57 @@ async function displayProfile(callCounter){
 }
 
 function createPagination(pageCount, page){
- 
+ /*
   const url = new URL(window.location.href).search;
-  const startUrl = url || "?view=profile";
+  let startUrl = "";
+
+  if(url !== null && url.length > 0){
+    const idx = url.indexOf("&page=");
+    if(idx > -1){
+      let cont = 6;
+      let nxt = idx + cont + 1;
+      if(nxt < url.length && url[nxt] !== "&"){
+        while(nxt < url.length &&  url[nxt] !== "&"){
+          cont++;
+          nxt = idx + cont + 1;
+        }
+      }
+      startUrl = url.slice(0, idx) + url.substring(idx + cont);
+      console.log("RESUTL ", idx, startUrl);
+    }
+    //startUrl = url.replace("page=", function(x){ console.log(x); return ""; } );
+
+  }else{
+    startUrl = "?view=profile";
+  } 
+  */
+
+  var queryParams = new URLSearchParams(window.location.search);
+  queryParams.set("page", page-1);
+
   const div = document.createElement("div");
   div.className = "pagination";
   const a0 = document.createElement("a");
-  a0.href = `${startUrl}&page=${page-1}`;
+  a0.href = "?"+queryParams.toString();// `${startUrl}&page=${page-1}`;
   a0.innerHTML = "&lt;";
   if(page <= 1)
     a0.style = "pointer-events:none;";
   div.appendChild(a0);
   for(var i=0; i<pageCount; i++){
     const a = document.createElement("a");
-    a.href = `${startUrl}&page=${i+1}`;
+    queryParams.set("page", i+1);
+    a.href = "?"+queryParams.toString();//`${startUrl}&page=${i+1}`;
     a.innerHTML = `${i+1}`;
     if(i == page-1){
       a.style = "font-weight:bold; text-decoration:underline;";
     }
     div.appendChild(a);
   }
+
+  queryParams.set("page", page+1);
+
   const a1 = document.createElement("a");
-  a1.href = `${startUrl}&page=${page+1}`;
+  a1.href = "?"+queryParams.toString();//`${startUrl}&page=${page+1}`;
   a1.innerHTML = "&gt;";
   if(page >= pageCount)
     a1.style = "pointer-events:none;";
@@ -799,9 +827,14 @@ async function createParticipantElement(owner, state, contracts, tokens, swapSta
     div.className = "swapCardToken";
 
     const nftContract = new ethers.Contract(contract, nftAbi, signer);
-    const tokenURI = await nftContract.tokenURI(tokenId);
+    let tokenURI;
+    try{ 
+      tokenURI = await nftContract.tokenURI(tokenId); 
+    }catch(e){
+      console.error("Failed to get tokenURI! ", e);
+      return div;
+    }
     let json = await (await fetch(tokenURI)).json();
-  
     const img = document.createElement("img");
     img.src = json.image; 
     const title = document.createElement("p");
@@ -826,7 +859,6 @@ async function createParticipantElement(owner, state, contracts, tokens, swapSta
 }
 
 }
-
 
 function createAboutPage(){
   const div = document.createElement("div");
@@ -868,13 +900,15 @@ function createAboutPage(){
     const td2 = document.createElement("td");
     const erc721 = contracts[chain]["NFT"]["ERC721"];
     if(erc721 !== undefined){  
-      td2.innerHTML = `<a target = "_blank" href= "https:/${scanner}/address/${erc721.contract}">${erc721.contract}</a>`;
+      const scan = contracts[chain].scanner; 
+      td2.innerHTML = `<a target = "_blank" href= "https:/${scan}/address/${erc721.contract}">${erc721.contract}</a>`;
       tr.appendChild(td2);
     }
     const td3 = document.createElement("td");
     const erc1155 = contracts[chain]["NFT"]["ERC1155"];
     if(erc1155 !== undefined){
-      td3.innerHTML = `<a target = "_blank" href= "https:/${scanner}/address/${erc1155.contract}">${erc1155.contract}</a>`;
+      const scan = contracts[chain].scanner;
+      td3.innerHTML = `<a target = "_blank" href= "https:/${scan}/address/${erc1155.contract}">${erc1155.contract}</a>`;
       tr.appendChild(td3);
     }
     tbody.appendChild(tr);
@@ -884,7 +918,6 @@ function createAboutPage(){
   aboutContractsDiv.appendChild(table);
  
 }
-
  
 // ##########################
  
