@@ -1,4 +1,4 @@
-let debug = false;
+let debug = true;
 let contracts, provider, signer, signerAddress, connected, networkId, scanner, swapperAddress, contractURL, signerURL, nftAbi, swapperAbi, platform;
 let swapperContract = undefined;
 let waiting = false;
@@ -40,7 +40,19 @@ window.onload = async function(){
     }
   });
 
-  if(debug){
+  fillFieldsForDebug();
+
+}
+
+function fillFieldsForDebug(){
+
+  if(debug===false){
+    return;
+  }
+
+  const by = document.getElementById("register").by;
+
+  if(by === "1" || by === 1){ 
     const sample = 2;
     switch(sample){
       case 0:
@@ -71,19 +83,25 @@ window.onload = async function(){
         document.getElementById("tokenIdsB").value = "0";
         break;
     }
-
+  }else{ 
+    document.getElementById("ownerA").value = "0x4443049b49Caf8Eb4E9235aA1Efe38FcFA0055a1";
+    document.getElementById("urlA").value = "https://testnets.opensea.io/assets/mumbai/0xe1600c43b7113b5eb18d6b2f4f5d4189ad27f9b0/3";
+    document.getElementById("ownerB").value = "0xa4Fb556e27CC4024f092709e0B0Ed8A5617F23c3";
+    document.getElementById("urlB").value = "https://testnets.opensea.io/assets/mumbai/0xf2e51312856fd2f86246b04a924bf49e197ad0c5/1";
   }
-
 }
 
-function updateURL(_view, _chain, _nft){
+function updateURL(_view, _chain, _nft, _by){
   
   const url = new URL(window.location.href);
 
-  const view = _view || getURLValue(url, "view", "register"); 
+  let view = _view || getURLValue(url, "view", "register"); 
   const chain = _chain || getURLValue(url, "chain", "Polygon");
   const nft = _nft || getURLValue(url, "nft", "ERC721");
-
+  if(view === "register"){
+    const by = _by || getURLValue(url, "by", "0"); 
+    view += `&by=${by}`;
+  }
   const state = {"view":view,"chain":chain, "nft":nft};
   const urlPath = `?view=${view}&chain=${chain}&nft=${nft}`;  
   window.history.pushState(state, "", urlPath);
@@ -136,6 +154,10 @@ function initVariables(){
     nftElement.appendChild(opt);
   }
 
+  const by = url.searchParams.get("by");
+  if(by !== null){
+    document.getElementById("register").by = by;
+  }
   updateVariables();
 } 
 
@@ -178,6 +200,18 @@ async function updatePage(){
     if(view == "register"){
       document.getElementById("approve").style.display = "block";
       document.getElementById("register").style.display = "block";
+ 
+      const by = url.searchParams.get("by");
+      if(by !== null){
+        if(by === "0"){
+          switchByRegister(0);
+        } else{
+          switchByRegister(1);
+        }  
+      }else{
+        registerByClicked(0);
+      }
+
     }else if(view == "profile"){
       document.getElementById("profile").style.display = "block";
       displayProfile();
@@ -310,48 +344,85 @@ async function approveButtonClicked(e){
   displayLoading(false);
 }
 
-async function registerButtonClicked(){
+async function registerByClicked(e){ 
+  switchByRegister(e); 
+  updateURL(undefined, undefined, undefined, e.toString());
+}
 
-  function getValue(id){
-    if(id.startsWith("owner")){
-      var value = document.getElementById(id).value;
-      if(value !== undefined){
-        return value.toString();
-      }
-      return "";
-    }
-    else if(id.startsWith("nftAddresses")){
-      var value = document.getElementById(id).value;
-      if(value !== undefined){
-        return value.replace(/\s/g, '').split(",");
-      }
-      return "";
-    }
-    else if(id.startsWith("tokenIds")){
-      var value = document.getElementById(id).value;
-      if(value !== undefined){
-        return value.replace(/\s/g, '').split(",");
-      }
-      return "";
-    }
+async function switchByRegister(e){
+  const url = document.getElementById("registerFormByURLs");
+  const urlF = document.getElementById("registerFieldByURLs");
+  const add = document.getElementById("registerFormByAddresses"); 
+  const addF = document.getElementById("registerFieldByAddresses");
+
+  url.disabled = urlF.disabled = false;
+  add.disabled = addF.disabled = false;
+
+  if(e === 0 || e === "0"){ 
+    add.disabled = addF.disabled = true;
+
+    url.style.display = "block";
+    add.style.display = "none";
+
+  }else{  
+    url.disabled = urlF.disabled = true; 
+    
+    url.style.display = "none";
+    add.style.display = "block";
   }
 
-  const ownerA = getValue("ownerA");
-  const nftAddressesA = getValue("nftAddressesA");
-  const tokenIdsA = getValue("tokenIdsA");
-  const ownerB = getValue("ownerB") || ethers.constants.AddressZero;
-  const nftAddressesB = getValue("nftAddressesB");
-  const tokenIdsB = getValue("tokenIdsB");
-  const public = document.getElementById("publicSwap").value;
+  document.getElementById("register").by = e;
+}
 
+async function registerButtonClicked(){
+ 
+  const by = document.getElementById("register").by;
+
+  let parent, ownerA, ownerB, nftAddressesA, nftAddressesB, tokenIdsA, tokenIdsB, public;
+
+  if(by === "1" || by === 1){
+    parent = document.getElementById("registerFieldByAddresses");
+
+    ownerA = getValue(parent, "ownerA");
+    nftAddressesA = getValue(parent, "nftAddressesA");
+    tokenIdsA = getValue(parent, "tokenIdsA");
+    ownerB = getValue(parent, "ownerB") || ethers.constants.AddressZero;
+    nftAddressesB = getValue(parent, "nftAddressesB");
+    tokenIdsB = getValue(parent, "tokenIdsB");
+    public = parent.querySelector("#publicSwap").value;
+
+  }else{
+    parent = document.getElementById("registerFieldByURLs");
+    console.log(parent);
+    ownerA = getValue(parent, "ownerA"); 
+    var urlsA = parent.getElementsByClassName("urlA");
+    nftAddressesA = [];
+    tokenIdsA = [];
+    for(var i = 0; i < urlsA.length; i++) {
+     const split = urlsA[i].value.split("/");
+      nftAddressesA.push(split[split.length - 2]);
+      tokenIdsA.push(split[split.length - 1]);
+    } 
+    ownerB = getValue(parent, "ownerB") || ethers.constants.AddressZero;
+    var urlsB = parent.getElementsByClassName("urlB");
+    nftAddressesB = [];
+    tokenIdsB = [];
+    for(var i = 0; i < urlsB.length; i++) {
+     const split = urlsB[i].value.split("/");
+      nftAddressesB.push(split[split.length - 2]);
+      tokenIdsB.push(split[split.length - 1]);
+    } 
+    public = parent.querySelector("#publicSwap").value;
+  }
+ 
   //if ownerB == 0 then it is a public swap.0
-  /*console.log(ownerA);
+  console.log(ownerA);
   console.log(nftAddressesA);
   console.log(tokenIdsA);
   console.log(ownerB);
   console.log(nftAddressesB);
   console.log(tokenIdsB);
-  console.log(public);*/
+  console.log(public);
 
   try{
    
@@ -370,6 +441,49 @@ async function registerButtonClicked(){
   }
   
   displayLoading(false);
+
+  
+  function getValue(parent, id){
+    if(id.startsWith("owner")){
+      var value = parent.querySelector("#"+id).value;
+      if(value !== undefined){
+        return value.toString();
+      }
+      return "";
+    }
+    else if(id.startsWith("nftAddresses")){
+      var value = parent.querySelector("#"+id).value;
+      if(value !== undefined){
+        return value.replace(/\s/g, '').split(",");
+      }
+      return "";
+    }
+    else if(id.startsWith("tokenIds")){
+      var value = parent.querySelector("#"+id).value;
+      if(value !== undefined){
+        return value.replace(/\s/g, '').split(",");
+      }
+      return "";
+    }
+  }
+
+}
+
+async function registerMoreClicked(side, sym){
+  const table = document.getElementById("urlTable" + side);
+  let count = table.rows.length;
+  if(sym === "+"){
+    var row = table.insertRow(count - 1); 
+    var cell1 = row.insertCell(0);
+    var cell2 = row.insertCell(1);
+    cell1.innerHTML = "<label for='Aurl' class=formLabel >URL</label>";
+    cell2.innerHTML = "<input type='text' id='urlA' name='Aurl'  placeholder='https://opensea.io/assets/matic/0x.../...' class='formInput urlA'  title='URL of the NFT owned by Owner A' required></input>";
+    count++;
+  }else{
+    table.deleteRow(count - 2);
+    count--;
+  } 
+  document.getElementById("registerLess" + side).style.display = count <= 3 ? "none" : "block";
 }
 
 async function swapButtonClicked(e){
@@ -567,7 +681,7 @@ async function displayProfile(callCounter){
             counter = 0; 
 
           }catch(e){
-            if(counter < errorTimes){
+            if(counter <= errorTimes){
               i -= 1;
               counter++;
               console.error(`Error loading swap ${i}, try ${counter} of ${errorTimes}`);
@@ -584,7 +698,7 @@ async function displayProfile(callCounter){
         if(typeof callCounter === "undefined"){
           callCounter = 0;
         }
-        if(callCounter < errorTimes){
+        if(callCounter <= errorTimes){
           setTimeout(() => {
             displayProfile(callCounter + 1);
           }, 1000);
@@ -651,30 +765,6 @@ async function displayProfile(callCounter){
 }
 
 function createPagination(pageCount, page){
- /*
-  const url = new URL(window.location.href).search;
-  let startUrl = "";
-
-  if(url !== null && url.length > 0){
-    const idx = url.indexOf("&page=");
-    if(idx > -1){
-      let cont = 6;
-      let nxt = idx + cont + 1;
-      if(nxt < url.length && url[nxt] !== "&"){
-        while(nxt < url.length &&  url[nxt] !== "&"){
-          cont++;
-          nxt = idx + cont + 1;
-        }
-      }
-      startUrl = url.slice(0, idx) + url.substring(idx + cont);
-      console.log("RESUTL ", idx, startUrl);
-    }
-    //startUrl = url.replace("page=", function(x){ console.log(x); return ""; } );
-
-  }else{
-    startUrl = "?view=profile";
-  } 
-  */
 
   var queryParams = new URLSearchParams(window.location.search);
   queryParams.set("page", page-1);
