@@ -65,196 +65,198 @@
           </div> 
         
         </div> 
-        <div id="register" class="step" style="display: none;"> 
-          <form id="registerFormByURLs" action="javascript:registerButtonClicked()" class="botCol">
-            <fieldset id="registerFieldByURLs">
-              <legend ><h3>Register new swap 📑</h3></legend>
-                <div class="tab"> 
-                  <button class="" onclick="registerByClicked(1)">By addresses</button>
-                </div>  
-                <p class="formDescription">Add the URL of the NFTs on OpenSea or LooksRare you want to swap.</p>
-                <div class="swapCardGroup">
-                  <div class="swapCardGroupColumn">
-                    <table id="urlTableA">
-                      <tr>
-                        <th style="width: 18%;"><label for="ownerA" class="formLabel" >Owner A</label></th>
-                        <th ><input type="text" id="ownerA" name="ownerA"  placeholder="0x..." class="formInput"  title="The owner of the Token Ids A on NFT Contract A" required></input></th>
-                      </tr>
-                      <tr>
-                        <th style="width: 18%;"><label for="Aurl" class="formLabel" >URL</label></th>
-                        <th ><input type="text" id="urlA" name="Aurl"  placeholder="https://opensea.io/assets/matic/0x.../..." class="formInput urlA"  title="URL of the NFT owned by Owner A" required></input></th>
-                      </tr>
-                      <tr>
-                        <th></th>
-                        <th>
-                          <div style="display:flex; flex-direction: row; justify-content: center;">
-                            <button id="registerMoreA" onclick="registerMoreClicked('A', '+')" type="button">+</button>
-                            <button id="registerLessA" onclick="registerMoreClicked('A', '-')" type="button" style="display:none;">-</button>
-                          </div> 
-                        </th>
-                      </tr> 
-                    </table> 
+        <div id="page">
+          <div id="register" class="step" style="display: none;"> 
+            <form id="registerFormByURLs" action="javascript:registerButtonClicked()" class="botCol">
+              <fieldset id="registerFieldByURLs">
+                <legend ><h3>Register new swap 📑</h3></legend>
+                  <div class="tab"> 
+                    <button class="" onclick="registerByClicked(1)">By addresses</button>
+                  </div>  
+                  <p class="formDescription">Add the URL of the NFTs on OpenSea or LooksRare you want to swap.</p>
+                  <div class="swapCardGroup">
+                    <div class="swapCardGroupColumn">
+                      <table id="urlTableA">
+                        <tr>
+                          <th style="width: 18%;"><label for="ownerA" class="formLabel" >Owner A</label></th>
+                          <th ><input type="text" id="ownerA" name="ownerA"  placeholder="0x..." class="formInput"  title="The owner of the Token Ids A on NFT Contract A" required></input></th>
+                        </tr>
+                        <tr>
+                          <th style="width: 18%;"><label for="Aurl" class="formLabel" >URL</label></th>
+                          <th ><input type="text" id="urlA" name="Aurl"  placeholder="https://opensea.io/assets/matic/0x.../..." class="formInput urlA"  title="URL of the NFT owned by Owner A" required></input></th>
+                        </tr>
+                        <tr>
+                          <th></th>
+                          <th>
+                            <div style="display:flex; flex-direction: row; justify-content: center;">
+                              <button id="registerMoreA" onclick="registerMoreClicked('A', '+')" type="button">+</button>
+                              <button id="registerLessA" onclick="registerMoreClicked('A', '-')" type="button" style="display:none;">-</button>
+                            </div> 
+                          </th>
+                        </tr> 
+                      </table> 
+                    </div>
+                    <div class="swapCardGroupColumn">
+                      <table id="urlTableB">
+                        <tr>
+                          <th style="width: 18%;"><label for="ownerB" class="formLabel" >Owner B</label></th>
+                          <th ><input type="text" id="ownerB" name="ownerB"  placeholder="0x..." class="formInput"  title="The owner of the Token Ids B on NFT Contract B" required></input></th>
+                        </tr>
+                        <tr>
+                          <th style="width: 18%;"><label for="Burl" class="formLabel" >URL</label></th>
+                          <th ><input type="text" id="urlB" name="Burl"  placeholder="https://opensea.io/assets/matic/0x.../..." class="formInput urlB"  title="URL of the NFT owned by Owner B" required></input></th>
+                        </tr>
+                        <tr>
+                          <th></th>
+                          <th>
+                            <div style="display:flex; flex-direction: row; justify-content: center;">
+                              <button id="registerMoreB" onclick="registerMoreClicked('B', '+')" type="button">+</button>
+                              <button id="registerLessB" onclick="registerMoreClicked('B', '-')" type="button" style="display:none;">-</button>
+                            </div> 
+                          </th>
+                        </tr>
+                      </table> 
+                    </div>
                   </div>
-                  <div class="swapCardGroupColumn">
-                    <table id="urlTableB">
-                      <tr>
-                        <th style="width: 18%;"><label for="ownerB" class="formLabel" >Owner B</label></th>
-                        <th ><input type="text" id="ownerB" name="ownerB"  placeholder="0x..." class="formInput"  title="The owner of the Token Ids B on NFT Contract B" required></input></th>
-                      </tr>
-                      <tr>
-                        <th style="width: 18%;"><label for="Burl" class="formLabel" >URL</label></th>
-                        <th ><input type="text" id="urlB" name="Burl"  placeholder="https://opensea.io/assets/matic/0x.../..." class="formInput urlB"  title="URL of the NFT owned by Owner B" required></input></th>
-                      </tr>
-                      <tr>
-                        <th></th>
-                        <th>
-                          <div style="display:flex; flex-direction: row; justify-content: center;">
-                            <button id="registerMoreB" onclick="registerMoreClicked('B', '+')" type="button">+</button>
-                            <button id="registerLessB" onclick="registerMoreClicked('B', '-')" type="button" style="display:none;">-</button>
-                          </div> 
-                        </th>
-                      </tr>
-                    </table> 
-                  </div>
-                </div>
-                <div id="registerButtonField" class="formGroup formGroupButton" style="display:flex; flex-direction: row; padding-left: 15px; padding-right: 15px;">
-                  <label for="publicSwap" class="formLabel">Public</label>
-                  <select name="publicSwap" id="publicSwap" class="formInput" style="width: 50%;" title="Set false to keep this swap only accesible by owner A and owner B, otherwise is public and can be seen by anyone">
-                    <option value="True">True</option>
-                    <option value="False">False</option>
-                  </select>
-                </div>
-              <br> 
-              <div id="registerButtonField" class="formGroup formGroupButton">
-                <input id="registerButton" type="submit" value="Register new swap" style="margin-bottom: 10px">
-                <label id="registeredId" class="formLabel"></label>
-              </div>
-            </fieldset> 
-          </form> 
-          <form id="registerFormByAddresses" action="javascript:registerButtonClicked()" class="botCol">
-            <fieldset id="registerFieldByAddresses">
-              <legend ><h3>Register new swap 📑</h3></legend>
-                <div class="tab">
-                  <button class="" onclick="registerByClicked(0)">By URLs</button> 
-                </div> 
-                <p class="formDescription">Create a new swap agreement by specifying one NFT contract address for each token ID. Separate with comma for multiple contracts/ids. You can create an open swap agreement by no specifying Owner B. Once complete you will get its Swap ID.</p>
-                <table>
-                  <tr>
-                    <th style="width: 15%;"><label for="ownerA" class="formLabel" >Owner A</label></th>
-                    <th ><input type="text" id="ownerA" name="ownerA"  placeholder="0x..." class="formInput"  title="The owner of the Token Ids A on NFT Contract A" required></input></th>
-                  </tr>
-                  <tr>
-                    <th style="width: 15%;"><label for="nftAddressesA" class="formLabel">NFT Contract A</label></th>
-                    <th><input type="text" id="nftAddressesA" name="nftAddressesA" placeholder="0x..." class="formInput" title="The NFT contract addresses of the Token Ids A to swap. Separate by commas if you want to exchange multiple NFTs. Must be the same amount as Token Ids A." multiple required></th>
-                  </tr>
-                  <tr>
-                    <th style="width: 15%;"><label for="tokenIdsA" class="formLabel">Token Ids A</label></th>
-                    <th ><input type="text" id="tokenIdsA" name="tokenIdsA" placeholder="0" class="formInput" title="The Token Ids A to swap. Separate by commas if you want to exchange multiple NFTs. Must be the same amount as NFT Contract A." multiple required></th>
-                  </tr>   
-                  <tr><th style="color:rgb(50, 50, 50)">.</th></tr>
-                  <tr>
-                    <th style="width: 15%;"><label for="ownerB" class="formLabel">Owner B</label></th>
-                    <th><input type="text" id="ownerB" name="ownerB" placeholder="0x..." class="formInput" title="The owner of the Token Ids B on NFT Contract B. Leave it empty to accept any owner as an open swap."></th>
-                  </tr> 
-                  <tr>
-                    <th style="width: 15%;"><label for="nftAddressesB" class="formLabel">NFT Contract B</label></th>
-                    <th><input type="text" id="nftAddressesB" name="nftAddressesB" placeholder="0x..." class="formInput" title="The NFT contract addresses of the Token Ids B to swap. Separate by commas if you want to exchange multiple NFTs. Must be the same amount as Token Ids B."multiple required></th>
-                  </tr> 
-                  <tr>
-                    <th style="width: 15%;"><label for="tokensIdsB" class="formLabel">Token Ids B</label></th>
-                    <td ><input type="text" id="tokenIdsB" name="tokensIdsB" placeholder="0" class="formInput" title="The Token ID of each NFT Contract B to swap. Separate by commas if you want to exchange multiple NFTs. Must be the same amount as NFT Contract B."multiple required></td> 
-                  </tr>
-                  <tr><th style="color:rgb(50, 50, 50)">.</th></tr>
-                  <tr>
-                    <th style="width: 15%;"><label for="publicSwap" class="formLabel">Public</label></th>
-                    <th><select name="publicSwap" id="publicSwap" class="formInput" title="Set false to keep this swap only accesible by owner A and owner B, otherwise is public and can be seen by anyone">
+                  <div id="registerButtonField" class="formGroup formGroupButton" style="display:flex; flex-direction: row; padding-left: 15px; padding-right: 15px;">
+                    <label for="publicSwap" class="formLabel">Public</label>
+                    <select name="publicSwap" id="publicSwap" class="formInput" style="width: 50%;" title="Set false to keep this swap only accesible by owner A and owner B, otherwise is public and can be seen by anyone">
                       <option value="True">True</option>
                       <option value="False">False</option>
-                    </select></th>
-                  </tr>
-                </table>  
+                    </select>
+                  </div>
+                <br> 
+                <div id="registerButtonField" class="formGroup formGroupButton">
+                  <input id="registerButton" type="submit" value="Register new swap" style="margin-bottom: 10px">
+                  <label id="registeredId" class="formLabel"></label>
+                </div>
+              </fieldset> 
+            </form> 
+            <form id="registerFormByAddresses" action="javascript:registerButtonClicked()" class="botCol">
+              <fieldset id="registerFieldByAddresses">
+                <legend ><h3>Register new swap 📑</h3></legend>
+                  <div class="tab">
+                    <button class="" onclick="registerByClicked(0)">By URLs</button> 
+                  </div> 
+                  <p class="formDescription">Create a new swap agreement by specifying one NFT contract address for each token ID. Separate with comma for multiple contracts/ids. You can create an open swap agreement by no specifying Owner B. Once complete you will get its Swap ID.</p>
+                  <table>
+                    <tr>
+                      <th style="width: 15%;"><label for="ownerA" class="formLabel" >Owner A</label></th>
+                      <th ><input type="text" id="ownerA" name="ownerA"  placeholder="0x..." class="formInput"  title="The owner of the Token Ids A on NFT Contract A" required></input></th>
+                    </tr>
+                    <tr>
+                      <th style="width: 15%;"><label for="nftAddressesA" class="formLabel">NFT Contract A</label></th>
+                      <th><input type="text" id="nftAddressesA" name="nftAddressesA" placeholder="0x..." class="formInput" title="The NFT contract addresses of the Token Ids A to swap. Separate by commas if you want to exchange multiple NFTs. Must be the same amount as Token Ids A." multiple required></th>
+                    </tr>
+                    <tr>
+                      <th style="width: 15%;"><label for="tokenIdsA" class="formLabel">Token Ids A</label></th>
+                      <th ><input type="text" id="tokenIdsA" name="tokenIdsA" placeholder="0" class="formInput" title="The Token Ids A to swap. Separate by commas if you want to exchange multiple NFTs. Must be the same amount as NFT Contract A." multiple required></th>
+                    </tr>   
+                    <tr><th style="color:rgb(50, 50, 50)">.</th></tr>
+                    <tr>
+                      <th style="width: 15%;"><label for="ownerB" class="formLabel">Owner B</label></th>
+                      <th><input type="text" id="ownerB" name="ownerB" placeholder="0x..." class="formInput" title="The owner of the Token Ids B on NFT Contract B. Leave it empty to accept any owner as an open swap."></th>
+                    </tr> 
+                    <tr>
+                      <th style="width: 15%;"><label for="nftAddressesB" class="formLabel">NFT Contract B</label></th>
+                      <th><input type="text" id="nftAddressesB" name="nftAddressesB" placeholder="0x..." class="formInput" title="The NFT contract addresses of the Token Ids B to swap. Separate by commas if you want to exchange multiple NFTs. Must be the same amount as Token Ids B."multiple required></th>
+                    </tr> 
+                    <tr>
+                      <th style="width: 15%;"><label for="tokensIdsB" class="formLabel">Token Ids B</label></th>
+                      <td ><input type="text" id="tokenIdsB" name="tokensIdsB" placeholder="0" class="formInput" title="The Token ID of each NFT Contract B to swap. Separate by commas if you want to exchange multiple NFTs. Must be the same amount as NFT Contract B."multiple required></td> 
+                    </tr>
+                    <tr><th style="color:rgb(50, 50, 50)">.</th></tr>
+                    <tr>
+                      <th style="width: 15%;"><label for="publicSwap" class="formLabel">Public</label></th>
+                      <th><select name="publicSwap" id="publicSwap" class="formInput" title="Set false to keep this swap only accesible by owner A and owner B, otherwise is public and can be seen by anyone">
+                        <option value="True">True</option>
+                        <option value="False">False</option>
+                      </select></th>
+                    </tr>
+                  </table>  
+                <br>
+                <div id="registerButtonField" class="formGroup formGroupButton">
+                  <input id="registerButton" type="submit" value="Register new swap" style="margin-bottom: 10px">
+                  <label id="registeredId" class="formLabel"></label>
+                </div>
+              </fieldset> 
+            </form> 
+          </div>
+          <div id="approve" class="step" style="display: none;">
+            <form action="javascript:approveButtonClicked(approveField.value)" class="botCol">
+              
+              <fieldset>
+                <legend ><h3>Approve to transfer 🔌</h3></legend>
+              <p class="formDescription">The NFT-Swapper contract must be approved as an operator on the NFT contracts by yourself in order to transfer your NFTs.</p>
+              <table>
+                <tr>
+                  <th style="width: 15%;"><label for="approve" class="formLabel" >NFT Addresses</label></th>
+                  <th><input type="text" id="approveField" name="approve" placeholder="0x..." class="formInput" maxlength="42" minlength="42" title="Approve one by one all the NFT addresses that you own used for the swap." required></input></th>
+                </tr>
+              </table>
               <br>
-              <div id="registerButtonField" class="formGroup formGroupButton">
-                <input id="registerButton" type="submit" value="Register new swap" style="margin-bottom: 10px">
-                <label id="registeredId" class="formLabel"></label>
+              <div class="formGroup formGroupButton">
+                <input type="submit" value="Approve to transfer">
+             </div>
+            </fieldset>
+            </form>
+          </div>
+          <div id="profile" class="step" style="display: none;">
+            <div class="swapFilter" id="swapFilter">
+              <label for="profileFilter" class="formLabel">Filter: </label> 
+              <select name="profileFilter" id="profileFilter" class="formInput" onchange="displayProfile()">
+                <option value="All">All</option>
+                <option value="Pending">Pending</option>
+                <option value="Deposited">Deposited</option>
+                <option value="Claimed">Claimed</option>
+                <option value="Cancelled">Cancelled</option>
+              </select> 
+            </div> 
+            <div id="loadingSwaps" style="font-style: italic; margin-top:50px; width: 100%; text-align: center;"> Loading your swaps... <span class="emoji" style="display: inline-block; animation: spin 3s infinite linear;">⌛</span></div>
+  
+          </div>
+          <div id="about" class="step" style="display:none;">
+            <h2>About</h2>
+            Peer to peer exchange of multiple NFTs for EVM chains.
+            <br> <br>When you want to exchange one or more NFTs with another person, so that you give them yours in exchange for them giving you theirs, the first person to send them needs to trust that the second person will do so as well. NFT Swapper solves this problem by using the contract as an intermediary, so that you can only claim each other's NFTs when you have both deposited yours.
+            <br> <br>The contracts listed here do not charge any commission, they are free to use. They also have no owner or administration mechanisms so everything is controlled by the user.       
+            <div id="guide" class="aboutSection">
+              <h3>Guide 🗺️</h3>
+              <div id="aboutGuide"> 
+  
+                <ol type="1">
+                  <li>Create a <a href="?view=register#register"><b>new swap agreement</b></a> by registering owners, NFT contract addresses and the token IDs.</li>
+                  <br>
+                  <li>Owners of NFTs must <a href="?view=register#aprove"><b>approve</b></a> as operator the Swapper contract address on the NFT contracts.</li>
+                  <br>
+                  <li>Both owners have to <a href="?view=profile&page=-1"><b>deposit</b></a> their NFTs in the swap agreement.</li>
+                  <br>
+                  <li>One owner can <a href="?view=profile&page=-1"><b>claim</b></a> the swap and both receive the other's NFTs.</li>
+                  <br>
+                </ol>  
               </div>
-            </fieldset> 
-          </form> 
-        </div>
-        <div id="approve" class="step" style="display: none;">
-          <form action="javascript:approveButtonClicked(approveField.value)" class="botCol">
-            
-            <fieldset>
-              <legend ><h3>Approve to transfer 🔌</h3></legend>
-            <p class="formDescription">The NFT-Swapper contract must be approved as an operator on the NFT contracts by yourself in order to transfer your NFTs.</p>
-            <table>
-              <tr>
-                <th style="width: 15%;"><label for="approve" class="formLabel" >NFT Addresses</label></th>
-                <th><input type="text" id="approveField" name="approve" placeholder="0x..." class="formInput" maxlength="42" minlength="42" title="Approve one by one all the NFT addresses that you own used for the swap." required></input></th>
-              </tr>
-            </table>
-            <br>
-            <div class="formGroup formGroupButton">
-              <input type="submit" value="Approve to transfer">
-           </div>
-          </fieldset>
-          </form>
-        </div>
-        <div id="profile" class="step" style="display: none;">
-          <div class="swapFilter" id="swapFilter">
-            <label for="profileFilter" class="formLabel">Filter: </label> 
-            <select name="profileFilter" id="profileFilter" class="formInput" onchange="displayProfile()">
-              <option value="All">All</option>
-              <option value="Pending">Pending</option>
-              <option value="Deposited">Deposited</option>
-              <option value="Claimed">Claimed</option>
-              <option value="Cancelled">Cancelled</option>
-            </select> 
-          </div> 
-          <div id="loadingSwaps" style="font-style: italic; margin-top:50px; width: 100%; text-align: center;"> Loading your swaps... <span class="emoji" style="display: inline-block; animation: spin 3s infinite linear;">⌛</span></div>
-
-        </div>
-        <div id="about" class="step" style="display:none;">
-          <h2>About</h2>
-          Peer to peer exchange of multiple NFTs for EVM chains.
-          <br> <br>When you want to exchange one or more NFTs with another person, so that you give them yours in exchange for them giving you theirs, the first person to send them needs to trust that the second person will do so as well. NFT Swapper solves this problem by using the contract as an intermediary, so that you can only claim each other's NFTs when you have both deposited yours.
-          <br> <br>The contracts listed here do not charge any commission, they are free to use. They also have no owner or administration mechanisms so everything is controlled by the user.       
-          <div id="guide" class="aboutSection">
-            <h3>Guide 🗺️</h3>
-            <div id="aboutGuide"> 
-
-              <ol type="1">
-                <li>Create a <a href="?view=register#register"><b>new swap agreement</b></a> by registering owners, NFT contract addresses and the token IDs.</li>
-                <br>
-                <li>Owners of NFTs must <a href="?view=register#aprove"><b>approve</b></a> as operator the Swapper contract address on the NFT contracts.</li>
-                <br>
-                <li>Both owners have to <a href="?view=profile&page=-1"><b>deposit</b></a> their NFTs in the swap agreement.</li>
-                <br>
-                <li>One owner can <a href="?view=profile&page=-1"><b>claim</b></a> the swap and both receive the other's NFTs.</li>
-                <br>
-              </ol>  
             </div>
-          </div>
-          <div id="contracts" class="aboutSection">
-            <h3>Contract Addresses 🔑</h3>
-            <div id="aboutContracts"></div>
-          </div>
-          <div id="contibute" class="aboutSection aboutGuide">
-            <h3>Contribute ☕</h3>
-            <ul>
-              <li>Issues and Pull Request on <a href="https://github.com/DanielAbalde/NFT-Swapper" target="_blank">Github</a> are welcome.</li>
-              <li>Let me know if you deploy the contracts on a different EVM blockchain.</li>
-              <li>Buy me a coffee at 0x4443049b49Caf8Eb4E9235aA1Efe38FcFA0055a1</li>
-              <li>Share it on social media!</li>
-            </ul>
-          </div>
-          <div id="contact" class="aboutSection">
-            <h3>Contact ✉️</h3>
-            <ul>
-              <li><a href="https://www.twitter.com/DGANFT" target="_blank" rel="noopener noreferrer"><i class="fab fa-twitter"> </i> @DGANFT</a></li>
-              <li><a href="https://discord.gg/H4WMdnz5nw" target="_blank" rel="noopener noreferrer"><i class="fab fa-discord"> </i> DaniGA#9856</a></li>
-            </ul>
-          </div>
+            <div id="contracts" class="aboutSection">
+              <h3>Contract Addresses 🔑</h3>
+              <div id="aboutContracts"></div>
+            </div>
+            <div id="contibute" class="aboutSection aboutGuide">
+              <h3>Contribute ☕</h3>
+              <ul>
+                <li>Issues and Pull Request on <a href="https://github.com/DanielAbalde/NFT-Swapper" target="_blank">Github</a> are welcome.</li>
+                <li>Let me know if you deploy the contracts on a different EVM blockchain.</li>
+                <li>Buy me a coffee at 0x4443049b49Caf8Eb4E9235aA1Efe38FcFA0055a1</li>
+                <li>Share it on social media!</li>
+              </ul>
+            </div>
+            <div id="contact" class="aboutSection">
+              <h3>Contact ✉️</h3>
+              <ul>
+                <li><a href="https://www.twitter.com/DGANFT" target="_blank" rel="noopener noreferrer"><i class="fab fa-twitter"> </i> @DGANFT</a></li>
+                <li><a href="https://discord.gg/H4WMdnz5nw" target="_blank" rel="noopener noreferrer"><i class="fab fa-discord"> </i> DaniGA#9856</a></li>
+              </ul>
+            </div>
+          </div> 
         </div> 
       </div> 
       <div id="bottomRow">

@@ -166,7 +166,8 @@ function updateVariables(){
   const chain = document.getElementById("chains").value;
   const nft = document.getElementById('nfttype').value;
 
-  networkId = contracts[chain].id;
+  networkId = contracts[chain].id; 
+
   scanner = contracts[chain].scanner;
   platform = contracts[chain].platform;
   swapperAbi = contracts[chain].NFT[nft].abiSwapper;
@@ -178,6 +179,13 @@ function updateVariables(){
 }
 
 async function updatePage(){
+
+  if(networkId !== "80001" && networkId !== 80001){
+    document.getElementById("register").style.display = "none";
+    document.getElementById("approve").style.display = "none";  
+    alert("Use this dapp as an early tester. Please connect to Mumbai network."); 
+    throw new Error("Use this dapp as an early tester. Please connect to Mumbai network.");
+  }
   
   document.getElementById("connectButton").innerHTML = connected ? 'Connected' : 'Connect';
   document.getElementById("connectLabel").innerHTML = connected ? signerAddress : "No wallet connected 🔒";
@@ -476,8 +484,8 @@ async function registerMoreClicked(side, sym){
     var row = table.insertRow(count - 1); 
     var cell1 = row.insertCell(0);
     var cell2 = row.insertCell(1);
-    cell1.innerHTML = "<label for='Aurl' class=formLabel >URL</label>";
-    cell2.innerHTML = "<input type='text' id='urlA' name='Aurl'  placeholder='https://opensea.io/assets/matic/0x.../...' class='formInput urlA'  title='URL of the NFT owned by Owner A' required></input>";
+    cell1.innerHTML = `<label for='${side}url' class=formLabel >URL</label>`;
+    cell2.innerHTML = `<input type='text' id='url${side}' name='${side}url'  placeholder='https://opensea.io/assets/matic/0x.../...' class='formInput url${side}'  title='URL of the NFT owned by Owner ${side}' required></input>`;
     count++;
   }else{
     table.deleteRow(count - 2);
