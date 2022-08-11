@@ -3,7 +3,7 @@ const { ethers } = require("hardhat");
 
 let erc721Contract, erc1155Contract, lsp7Contract, lsp8Contract, swapperContract;
 let signer, ownerA, ownerB, ownerC;
-let erc721Handler, erc1155Handler, lsp7Handler, lsp8Handler;
+let erc721Handler, erc1155Handler, lsp7Handler, lsp8Handler, erc20Handler;
 let handlers = [];
 const zeroAddress = '0x0000000000000000000000000000000000000000';
 
@@ -98,11 +98,13 @@ describe("Initialize", function(){
     const erc1155HandlerFactory = await ethers.getContractFactory("ERC1155Handler");
     const lsp7HandlerFactory = await ethers.getContractFactory("LSP7Handler");
     const lsp8HandlerFactory = await ethers.getContractFactory("LSP8Handler");
+    const erc20HandlerFactory = await ethers.getContractFactory("ERC20Handler");
 
     erc721Handler = await erc721HandlerFactory.deploy();
     erc1155Handler = await erc1155HandlerFactory.deploy();
     lsp7Handler = await lsp7HandlerFactory.deploy();
     lsp8Handler = await lsp8HandlerFactory.deploy();
+    erc20Handler = await erc20HandlerFactory.deploy();
     handlers = [erc721Handler.address, erc1155Handler.address, lsp7Handler.address, lsp8Handler.address];
 
   });
@@ -353,6 +355,79 @@ describe("NFTSwapper", function(){
 
     txGetSwaps = await swapperContract.getSwaps(ownerC.address);
     expect(txGetSwaps.length).to.equal(0);
+
+    txGetSwaps = await swapperContract.getSwaps(zeroAddress);
+    expect(txGetSwaps.length).to.equal(1);
+
+  });
+
+  it("Register swap and remove all tendered", async function(){
+    const addA = [erc721Contract.address, erc1155Contract.address];
+    const idA = [1, 1];
+    const amoA = [1, 2];
+    const addB = [erc721Contract.address, erc721Contract.address];
+    const idB = [intToBytes32(11), intToBytes32(12)];
+    const amoB = [1, 1];
+    const swapId = await registerSwap(ownerA.address, addA, idA, amoA, [ownerB.address], addB, idB, amoB);
+
+    const txSetApprovedTendered = await swapperContract.connect(ownerA).setApprovedTendered(swapId, ownerB.address, false);
+    const rcSetApprovedTendered = await txSetApprovedTendered.wait();
+
+    var txGetSwaps = await swapperContract.getSwaps(ownerB.address);
+    expect(txGetSwaps.length).to.equal(2); 
+
+    txGetSwaps = await swapperContract.getSwaps(zeroAddress);
+    expect(txGetSwaps.length).to.equal(2);
+  });
+
+  it("Register swap and make it public and then closed", async function(){
+    const addA = [erc721Contract.address, erc1155Contract.address];
+    const idA = [1, 1];
+    const amoA = [1, 2];
+    const addB = [erc721Contract.address, erc721Contract.address];
+    const idB = [intToBytes32(11), intToBytes32(12)];
+    const amoB = [1, 1];
+    const swapId = await registerSwap(ownerA.address, addA, idA, amoA, [ownerB.address], addB, idB, amoB);
+
+    var txSetApprovedTendered = await swapperContract.connect(ownerA).setApprovedTendered(swapId, zeroAddress, true);
+    var rcSetApprovedTendered = await txSetApprovedTendered.wait();
+
+    var txGetSwaps = await swapperContract.getSwaps(ownerB.address);
+    expect(txGetSwaps.length).to.equal(3); 
+
+    txGetSwaps = await swapperContract.getSwaps(zeroAddress);
+    expect(txGetSwaps.length).to.equal(3);
+
+    txSetApprovedTendered = await swapperContract.connect(ownerA).setApprovedTendered(swapId, zeroAddress, false);
+    rcSetApprovedTendered = await txSetApprovedTendered.wait();
+
+    var txGetSwaps = await swapperContract.getSwaps(ownerB.address);
+    expect(txGetSwaps.length).to.equal(3); 
+
+    txGetSwaps = await swapperContract.getSwaps(zeroAddress);
+    expect(txGetSwaps.length).to.equal(2);
+  });
+
+  it("Support new standard", async function(){
+
+    var handlerCount = (await swapperContract.getHandlers()).length;
+    expect(handlerCount).to.equal(4);
+
+    const txSupportStandard = await swapperContract.supportStandard(erc20Handler.address);
+    const rcSupportStandard = await txSupportStandard.wait();
+
+    handlerCount = (await swapperContract.getHandlers()).length;
+    expect(handlerCount).to.equal(5);
+
+  });
+  
+  it("Unsupport standard", async function(){
+ 
+    const txSupportStandard = await swapperContract.unsupportStandard(erc20Handler.address);
+    const rcSupportStandard = await txSupportStandard.wait();
+
+    handlerCount = (await swapperContract.getHandlers()).length;
+    expect(handlerCount).to.equal(4);
 
   });
 

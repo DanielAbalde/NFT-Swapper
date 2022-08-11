@@ -10,7 +10,7 @@ contract LSP7Handler is ISwapperHandler {
     function isHandlerOf(address nft) public view override returns (bool){
         return ILSP7DigitalAsset(nft).supportsInterface(type(ILSP7DigitalAsset).interfaceId);
     }
-
+    
     function isOwnerOf(address account, address nft, bytes32 /*tokenId*/, uint256 amount) 
                         public view override returns (bool){
         return ILSP7DigitalAsset(nft).balanceOf(account) >= amount;

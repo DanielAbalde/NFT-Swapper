@@ -6,13 +6,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-/*
-Check gas cost for register including checking standard is supported
-
-public swaps
-
-*/
- 
 contract NFTSwapper is Context, Ownable
 { 
     using Counters for Counters.Counter;  
@@ -58,16 +51,25 @@ contract NFTSwapper is Context, Ownable
         _;
     }
     modifier onlyTendered(uint256 id, address applicant) {
-        Swap storage s = _swaps[id];
-        bool isTendered = false;
+        Swap storage s = _swaps[id]; 
         for(uint256 i=0; i<s.Tendered.length; i++){
             if(s.Tendered[i] == address(0) || s.Tendered[i] == applicant){
-                isTendered = true;
-                break;
+                _;
+                return;
             }
         }
-        require(isTendered, "NFTSwapper: not a tendered"); 
-        _;
+        require(false, "NFTSwapper: not a tendered"); 
+        
+    }
+    modifier onlyParticipant(uint256 id, address applicant) {
+        uint256[] memory participants = _participants[applicant];
+        for(uint256 i=0; i<participants.length; i++){
+            if(participants[i] == id){
+                _;
+                return;
+            }
+        }
+        require(false, "NFTSwapper: not a participant"); 
     }
     modifier stillPending(uint256 id){
         require(_swaps[id].State == SwapState.Pending, "NFTSwapper: swap is completed or cancelled");
@@ -86,19 +88,20 @@ contract NFTSwapper is Context, Ownable
         _swaps[id].Bidder = bidder;
         _participants[bidder].push(id);
         for(uint256 i=0; i<offer.length; i++){
+            getHandler(offer[i].NFT);
             _swaps[id].Offer.push(offer[i]);
         }
-        //_swaps[id].Tendered = tendered;
         for(uint256 i=0; i<tendered.length; i++){
             _swaps[id].Tendered.push(tendered[i]);
             _participants[tendered[i]].push(id);
         }
         for(uint256 i=0; i<demand.length; i++){
+            getHandler(demand[i].NFT);
             _swaps[id].Demand.push(demand[i]);
         }
         emit SwapStateChanged(id, SwapState.Pending);
     }
-
+     
     function cancel(uint256 id) public
                     existsSwapId(id)
                     onlyBidder(id, _msgSender())
@@ -171,6 +174,10 @@ contract NFTSwapper is Context, Ownable
                             break;
                         } 
                     }
+                    if(tendered.length == 0){ 
+                        tendered.push(address(0));
+                        _participants[address(0)].push(id);
+                    }
                     return;
                 }
             }
@@ -206,8 +213,12 @@ contract NFTSwapper is Context, Ownable
         require(false, "NFTSwapper: getHandler: no handler found");
     }
 
-    // ############################ OWNER METHODS ############################
+    function getHandlers() public view returns(ISwapperHandler[] memory){
+        return _handlers;
+    }
  
+    // ############################ OWNER METHODS ############################
+
     function supportStandard(address handlerAddress) public onlyOwner()
     {
         require(ISwapperHandler(handlerAddress).supportsInterface(type(ISwapperHandler).interfaceId), "handler does not support ISwapperHandler");
@@ -217,8 +228,9 @@ contract NFTSwapper is Context, Ownable
     {
         require(ISwapperHandler(handlerAddress).supportsInterface(type(ISwapperHandler).interfaceId), "handler does not support ISwapperHandler");
         for(uint256 i = 0; i < _handlers.length; i++) {
-            if(_handlers[i] == ISwapperHandler(handlerAddress)) {
+            if(address(_handlers[i]) == handlerAddress) {
                 delete _handlers[i];
+                _handlers.pop();
                 break;
             }
         } 

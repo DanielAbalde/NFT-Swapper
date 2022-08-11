@@ -10,11 +10,12 @@ contract ERC721Handler is ISwapperHandler, IERC721Receiver{
     function isHandlerOf(address nft) public view override returns (bool){
         return IERC721(nft).supportsInterface(type(IERC721).interfaceId);
     }
-
+    
     function isOwnerOf(address account, address nft, bytes32 tokenId, uint256 /*amount*/) 
                         public view override returns (bool){
         return IERC721(nft).ownerOf(uint256(tokenId)) == account;
     } 
+
     function transferOwnership(address from, address nft, bytes32 tokenId, uint256 /*amount*/, address to)
                                 public override returns(bool){ 
         IERC721(nft).safeTransferFrom(from, to, uint256(tokenId)); 
