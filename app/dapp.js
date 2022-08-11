@@ -1,4 +1,4 @@
-let debug = false;
+let debug = true;
 let contracts, provider, signer, signerAddress, connected, networkId, scanner, swapperAddress, contractURL, signerURL, nftAbi, swapperAbi, platform;
 let swapperContract = undefined;
 let waiting = false;
@@ -276,9 +276,10 @@ const isMetaMaskConnected = async () => {
 // ##########################
  
 async function OnSwapStateChanged(swapId, state){
+  console.log(`State of SwapID ${swapId.toNumber()} changed to "${translateStateWithEmoji(state)}"`);
   const swap = await getSwapperContract().getSwap(swapId);
   if(swap.OwnerA === signerAddress || swap.OwnerB === signerAddress || debug){
-    console.log(`State of SwapID ${swapId.toNumber()} changed to "${translateState(state)}"`);
+
     if(swap.StateA === 0 && swap.StateB === 0){
       const label = document.getElementById("registeredId"); 
       label.style.display = "block";
@@ -424,13 +425,16 @@ async function registerButtonClicked(){
   }
  
   //if ownerB == 0 then it is a public swap.0
-  console.log(ownerA);
-  console.log(nftAddressesA);
-  console.log(tokenIdsA);
-  console.log(ownerB);
-  console.log(nftAddressesB);
-  console.log(tokenIdsB);
-  console.log(public);
+  if(debug){
+    console.log(ownerA);
+    console.log(nftAddressesA);
+    console.log(tokenIdsA);
+    console.log(ownerB);
+    console.log(nftAddressesB);
+    console.log(tokenIdsB);
+    console.log(public);
+  }
+
 
   try{
    
