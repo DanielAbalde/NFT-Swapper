@@ -431,6 +431,61 @@ describe("NFTSwapper", function(){
 
   });
 
+  it("Add and remove contributor", async function(){
+    const initShare = 100;
+    var totalShares = await swapperContract.getTotalShares();
+    expect(totalShares.toNumber()).to.equal(initShare);
+
+    const txSetContributor0 = await swapperContract.setContributor(ownerB.address, 30);
+    const rcSetContributor0 = await txSetContributor0.wait();
+
+    var contributors = await swapperContract.getContributors();
+    expect(contributors.length).to.equal(2);
+
+    totalShares = await swapperContract.getTotalShares();
+    expect(totalShares.toNumber()).to.equal(initShare + 30);
+
+    const txSetContributor1 = await swapperContract.setContributor(ownerB.address, 0);
+    const rcSetContributor1 = await txSetContributor1.wait();
+
+    contributors = await swapperContract.getContributors();
+    expect(contributors.length).to.equal(1);
+ 
+    totalShares = await swapperContract.getTotalShares();
+    expect(totalShares.toNumber()).to.equal(initShare); 
+  });
+
+  it("Change share of contributor", async function(){
+ 
+    const txSetContributor = await swapperContract.setContributor(signer.address, 50);
+    const rcSetContributor = await txSetContributor.wait();
+
+    var contributors = await swapperContract.getContributors();
+    expect(contributors.length).to.equal(1);
+
+    var totalShares = await swapperContract.getTotalShares();
+    expect(totalShares.toNumber()).to.equal(50);
+
+  });
+
+  it("Only contributor", async function(){
+    try{ 
+      var totalShares = await swapperContract.connect(ownerA).getTotalShares(); 
+      console.log("getTotalShares by ownerA should fail");
+      expect(false).to.equal(true); 
+    }catch(e){ 
+      //console.log(e);
+    }
+
+    const txSetContributor = await swapperContract.setContributor(ownerA.address, 50);
+    const rcSetContributor = await txSetContributor.wait();
+
+    var shareA = await swapperContract.connect(ownerA).getShare(ownerA.address); 
+    expect(shareA.toNumber()).to.equal(50);
+  });
+
+  
+
   after("Finalize", async function () {
     [signer, ownerA, ownerB, ownerC] = await ethers.getSigners();  
     console.log("signer: " + signer.address, ", balance: ", await getBalance(signer));

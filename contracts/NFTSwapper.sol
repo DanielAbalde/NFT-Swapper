@@ -31,13 +31,20 @@ contract NFTSwapper is Context, Ownable
 
     mapping(uint256=>Swap) private _swaps;
     mapping(address=>uint256[]) private _participants;
+
+    mapping(address=>uint256) private _contributorShares;
+    address[] private _contributors;
+    uint256 private _totalShares;
+    uint256 private _totalFees;
+
     ISwapperHandler[] private _handlers; 
     Counters.Counter private _counter;
- 
+    
     constructor(address[] memory handlerAddresses) { 
         for (uint256 i = 0; i < handlerAddresses.length; i++) {
             supportStandard(handlerAddresses[i]);
         }
+        setContributor(_msgSender(), 100);
     }
  
     // ############################ MODIFIER METHODS ############################
@@ -70,6 +77,10 @@ contract NFTSwapper is Context, Ownable
             }
         }
         require(false, "NFTSwapper: not a participant"); 
+    } 
+    modifier onlyContributor(address applicant) {
+        require(_contributorShares[applicant] > 0, "NFTSwapper: not a contributor"); 
+        _;
     }
     modifier stillPending(uint256 id){
         require(_swaps[id].State == SwapState.Pending, "NFTSwapper: swap is completed or cancelled");
@@ -79,7 +90,7 @@ contract NFTSwapper is Context, Ownable
     // ############################ PUBLIC METHODS ############################
 
    function register(address bidder, Token[] calldata offer, address[] calldata tendered, Token[] calldata demand)   
-                        public returns (uint256 id)
+                        public payable returns (uint256 id)
     { 
         require(bidder != address(0), "NFTSwapper: bidder is not valid");
         _counter.increment();
@@ -119,7 +130,7 @@ contract NFTSwapper is Context, Ownable
         emit SwapStateChanged(id, SwapState.Pending);
     }
 
-    function swap(uint256 id, address[] memory nfts, bytes32[] memory tokenIds, uint256[] memory amounts) public
+    function swap(uint256 id, address[] memory nfts, bytes32[] memory tokenIds, uint256[] memory amounts) public payable
                     existsSwapId(id)
                     onlyTendered(id, _msgSender())
                     stillPending(id)
@@ -216,8 +227,9 @@ contract NFTSwapper is Context, Ownable
     function getHandlers() public view returns(ISwapperHandler[] memory){
         return _handlers;
     }
+
  
-    // ############################ OWNER METHODS ############################
+    // ############################ OWNER/CONTRIBUTOR METHODS ############################
 
     function supportStandard(address handlerAddress) public onlyOwner()
     {
@@ -235,5 +247,64 @@ contract NFTSwapper is Context, Ownable
             }
         } 
     }
-  
+
+    function setContributor(address contributor, uint256 share) public onlyOwner()
+    { 
+        if(share > 0){
+            if(_contributorShares[contributor] > 0){
+                _totalShares = _totalShares - _contributorShares[contributor] + share;
+                _contributorShares[contributor] = share; 
+            }else{
+                _totalShares = _totalShares + share;
+                _contributorShares[contributor] = share;
+                _contributors.push(contributor);
+            }
+        }else{
+            require(_contributorShares[contributor] > 0, "NFTSwapper: removeContributor: contributor not found");
+            _totalShares = _totalShares - _contributorShares[contributor];
+            for(uint256 i = 0; i < _contributors.length; i++) {
+                if(_contributors[i] == contributor) {
+                    delete _contributors[i];
+                    _contributors.pop();
+                    break;
+                }
+            }
+            delete _contributorShares[contributor];
+        } 
+    }
+
+    function getContributors() public view onlyContributor(_msgSender()) returns(address[] memory){
+        return _contributors;
+    }
+    function getTotalShares() public view onlyContributor(_msgSender()) returns(uint256){
+        return _totalShares;
+    }
+    function getShare(address constributor) public view onlyContributor(_msgSender()) returns(uint256){
+        return _contributorShares[constributor];
+    }
+
+    function getFee(address account) private view returns(uint256){
+        uint256 swappedCount = 0;
+        uint256[] memory swaps = _participants[account];
+        for(uint256 i=0; i<swaps.length; i++){
+            if(_swaps[swaps[i]].State == SwapState.Completed){
+                swappedCount++;
+            }
+        }
+
+        return 0;
+    }
+
+    function withdraw() public onlyOwner(){
+        uint256 balance = address(this).balance;
+        for(uint256 i=0; i<_contributors.length; i++){
+            address payable contributor = payable(_contributors[i]);
+            uint256 share = _contributorShares[contributor];
+            uint256 amount = balance * share / _totalShares;
+            contributor.transfer(amount);
+        }
+    }
+    
+    receive() external payable {}
+    fallback() external payable {}
 }
