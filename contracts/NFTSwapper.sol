@@ -35,9 +35,10 @@ contract NFTSwapper is Context, Ownable
     mapping(address=>uint256) private _contributorShares;
     address[] private _contributors;
     uint256 private _totalShares;
-    uint256 private _totalFees;
+    uint256 private _registerFee = 0 ether;
+    uint256 private _swapFee = 0 ether;
 
-    ISwapperHandler[] private _handlers; 
+    ISwapperHandler[] private _handlers;  
     Counters.Counter private _counter;
     
     constructor(address[] memory handlerAddresses) { 
@@ -78,8 +79,8 @@ contract NFTSwapper is Context, Ownable
         }
         require(false, "NFTSwapper: not a participant"); 
     } 
-    modifier onlyContributor(address applicant) {
-        require(_contributorShares[applicant] > 0, "NFTSwapper: not a contributor"); 
+    modifier onlyContributor() {
+        require(_contributorShares[_msgSender()] > 0, "NFTSwapper: not a contributor"); 
         _;
     }
     modifier stillPending(uint256 id){
@@ -92,7 +93,8 @@ contract NFTSwapper is Context, Ownable
    function register(address bidder, Token[] calldata offer, address[] calldata tendered, Token[] calldata demand)   
                         public payable returns (uint256 id)
     { 
-        require(bidder != address(0), "NFTSwapper: bidder is not valid");
+        require(bidder != address(0), "NFTSwapper: register: bidder is not valid");
+        require(msg.value >= getRegisterFee(), "NFTSwapper: register: insufficient value for register");
         _counter.increment();
         id = _counter.current(); 
         _swaps[id].Id = id;
@@ -130,22 +132,23 @@ contract NFTSwapper is Context, Ownable
         emit SwapStateChanged(id, SwapState.Pending);
     }
 
-    function swap(uint256 id, address[] memory nfts, bytes32[] memory tokenIds, uint256[] memory amounts) public payable
+    function swap(uint256 id/*, address[] memory nfts, bytes32[] memory tokenIds, uint256[] memory amounts*/) public payable
                     existsSwapId(id)
                     onlyTendered(id, _msgSender())
                     stillPending(id)
     {
+        require(msg.value >= getSwapFee(), "NFTSwapper: swap: insufficient value for swap");
         Swap storage s = _swaps[id]; 
-        require(nfts.length == tokenIds.length, "NFTSwapper: swap: nfts and tokenIds must have the same length");
+        /*require(nfts.length == tokenIds.length, "NFTSwapper: swap: nfts and tokenIds must have the same length");
         require(nfts.length == amounts.length, "NFTSwapper: swap: nfts and amounts must have the same length");
         require(nfts.length == s.Demand.length, "NFTSwapper: swap: given NFTs length different from expected NFTs length");
-
+**/
         for(uint256 i=0; i<s.Demand.length; i++){
             Token storage token = s.Demand[i];
-            require(token.NFT == nfts[i], "NFTSwapper: swap: given NFT doesn't match demanded NFT");
+            /*require(token.NFT == nfts[i], "NFTSwapper: swap: given NFT doesn't match demanded NFT");
             require(token.TokenId == tokenIds[i], "NFTSwapper: swap: given tokenId doesn't match demanded tokenId");
             require(token.Amount == amounts[i], "NFTSwapper: swap: given tokenId doesn't match demanded tokenId");
-            ISwapperHandler handler = getHandler(token.NFT); 
+            */ISwapperHandler handler = getHandler(token.NFT); 
             require(handler.isOwnerOf(_msgSender(), token.NFT, token.TokenId, token.Amount), "NFTSwapper: swap: sender is not the owner of demanded NFTs");
             require(handler.transferOwnership(_msgSender(), token.NFT, token.TokenId, token.Amount, s.Bidder), "NFTSwapper: swap: transfer from tendered to bidder failed");  
         }
@@ -250,6 +253,7 @@ contract NFTSwapper is Context, Ownable
 
     function setContributor(address contributor, uint256 share) public onlyOwner()
     { 
+        require(contributor.code.length == 0, "NFTSwapper: setContributor: contributor address is not a EOA");
         if(share > 0){
             if(_contributorShares[contributor] > 0){
                 _totalShares = _totalShares - _contributorShares[contributor] + share;
@@ -273,30 +277,38 @@ contract NFTSwapper is Context, Ownable
         } 
     }
 
-    function getContributors() public view onlyContributor(_msgSender()) returns(address[] memory){
+    function getContributors() public view onlyContributor() returns(address[] memory){
         return _contributors;
     }
-    function getTotalShares() public view onlyContributor(_msgSender()) returns(uint256){
+    function getTotalShares() public view onlyContributor() returns(uint256){
         return _totalShares;
     }
-    function getShare(address constributor) public view onlyContributor(_msgSender()) returns(uint256){
+    function getShare(address constributor) public view onlyContributor() returns(uint256){
         return _contributorShares[constributor];
     }
 
-    function getFee(address account) private view returns(uint256){
-        uint256 swappedCount = 0;
-        uint256[] memory swaps = _participants[account];
-        for(uint256 i=0; i<swaps.length; i++){
-            if(_swaps[swaps[i]].State == SwapState.Completed){
-                swappedCount++;
-            }
-        }
+ 
+    // ############################ FEES METHODS ############################
 
-        return 0;
+    function getRegisterFee() public view returns(uint256){
+        return _registerFee;
+    }
+    function setRegisterFee(uint256 fee) public onlyOwner()
+    {
+        _registerFee = fee;
     }
 
-    function withdraw() public onlyOwner(){
+    function getSwapFee() public view returns(uint256){
+        return _swapFee;
+    }
+    function setSwapFee(uint256 fee) public onlyOwner()
+    {
+        _swapFee = fee;
+    }
+
+    function withdraw() public onlyContributor(){
         uint256 balance = address(this).balance;
+        require(balance > 0, "NFTSwapper: withdraw: no balance"); 
         for(uint256 i=0; i<_contributors.length; i++){
             address payable contributor = payable(_contributors[i]);
             uint256 share = _contributorShares[contributor];

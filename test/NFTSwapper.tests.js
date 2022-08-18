@@ -273,7 +273,7 @@ describe("NFTSwapper", function(){
       const amoB = [1, 1]; 
 
       try{
-        const txSwapA = await swapperContract.connect(ownerA).swap(swapId, addB, idB, amoB);
+        const txSwapA = await swapperContract.connect(ownerA).swap(swapId);
         const reSwapA = await txSwapA.wait();
         console.log("Swap a swap by bidder should fail");
         expect(false).to.equal(true); 
@@ -282,7 +282,7 @@ describe("NFTSwapper", function(){
       }
  
       try{
-        const txSwapC = await swapperContract.connect(ownerC).swap(swapId, addB, idB, amoB);
+        const txSwapC = await swapperContract.connect(ownerC).swap(swapId);
         const reSwapC = await txSwapC.wait();
         console.log("Swap a swap by ownerC should fail");
         expect(false).to.equal(true); 
@@ -290,7 +290,7 @@ describe("NFTSwapper", function(){
         //console.log(e);
       }
 
-      const txSwap = await swapperContract.connect(ownerB).swap(swapId, addB, idB, amoB);
+      const txSwap = await swapperContract.connect(ownerB).swap(swapId);
       const reSwap = await txSwap.wait(); 
       const evSwap = reSwap.events[reSwap.events.length-1];
       expect(evSwap.args.id.toNumber()).to.equal(swapId);
@@ -484,7 +484,117 @@ describe("NFTSwapper", function(){
     expect(shareA.toNumber()).to.equal(50);
   });
 
-  
+  it("Change fees", async function(){
+ 
+    var newFee = ethers.utils.parseUnits("1.0", "ether"); 
+
+    const txSetRegisterFee = await swapperContract.setRegisterFee(newFee);
+    const rcSetRegisterFee = await txSetRegisterFee.wait();
+
+    const registerFee = await swapperContract.getRegisterFee(); 
+    expect(registerFee.toString()).to.equal(newFee.toString());
+
+    const txSetSwapFee = await swapperContract.setSwapFee(newFee);
+    const rcSetSwapFee = await txSetSwapFee.wait();
+
+    const swapFee = await swapperContract.getSwapFee(); 
+    expect(swapFee.toString()).to.equal(newFee.toString());
+  });
+
+  it("Register with fee", async function(){
+    const bidder = ownerA.address;
+    const offerNFTs = [erc721Contract.address, erc1155Contract.address];
+    const offerTokenIds = [3, 3];
+    const offerAmounts = [1, 2];
+    const tendered = [ownerB.address];
+    const demandNFTs = [erc721Contract.address, erc721Contract.address];
+    const demandTokenIds = [intToBytes32(13), intToBytes32(14)];
+    const demandAmounts = [1, 1];
+    const tokensA = createTokens(offerNFTs, offerTokenIds, offerAmounts);
+    const tokensB = createTokens(demandNFTs, demandTokenIds, demandAmounts);
+
+    try{
+      const txRegister = await swapperContract.connect(ownerA).register(bidder, tokensA, tendered, tokensB); 
+      const reRegister = await txRegister.wait(); 
+      console.log("register should fail due to insufficient fee");
+      expect(false).to.equal(true);
+    }catch(e){
+      //console.log(e);
+    }
+     
+    var balance = await ethers.provider.getBalance(swapperContract.address);
+    expect(balance.toString()).to.equal("0");
+
+    const fee = ethers.utils.parseEther("1.0");
+    const txRegister = await swapperContract.connect(ownerA).register(bidder, tokensA, tendered, tokensB, { value: fee }); 
+    const reRegister = await txRegister.wait(); 
+
+    balance = await ethers.provider.getBalance(swapperContract.address);
+    expect(balance.toString()).to.equal(fee.toString());
+  });
+
+  it("Swap with fee", async function(){
+    const swapId = (await swapperContract.getSwapCount()).toNumber();
+
+    try{
+      const txSwap = await swapperContract.connect(ownerB).swap(swapId); 
+      const reSwap = await txSwap.wait(); 
+      console.log("swap should fail due to insufficient fee");
+      expect(false).to.equal(true);
+    }catch(e){
+      //console.log(e);
+    }
+
+    const previousBalance = await ethers.provider.getBalance(swapperContract.address);
+
+    const fee = ethers.utils.parseEther("2.0");
+    const txSwap = await swapperContract.connect(ownerB).swap(swapId, { value: fee });
+    const reSwap = await txSwap.wait(); 
+
+    var balance = await ethers.provider.getBalance(swapperContract.address);
+    expect(balance.toString()).to.equal((previousBalance.add(fee)).toString());
+
+  });
+
+  it("Withdraw fee", async function(){
+
+    const contributors = await swapperContract.getContributors();
+    expect(contributors.length).to.equal(2);
+    const balances = [];
+    for(var i = 0; i < contributors.length; i++){
+      balances.push(await ethers.provider.getBalance(contributors[i]));
+    }
+
+    const previousBalance = await ethers.provider.getBalance(swapperContract.address);
+
+    try{
+      const txWithdraw = await swapperContract.connect(ownerB).withdraw(); 
+      const reWithdraw = await txWithdraw.wait(); 
+      console.log("withdraw should fail by not a contributor");
+      expect(false).to.equal(true);
+    }catch(e){
+      //console.log(e);
+    }
+
+    const txWithdraw = await swapperContract.connect(ownerA).withdraw();
+    const reWithdraw = await txWithdraw.wait();
+
+    var balance = await ethers.provider.getBalance(swapperContract.address);
+    expect(balance.toString()).to.equal("0");
+
+    var sum = ethers.BigNumber.from("0");
+    for(var i = 0; i < contributors.length; i++){
+       const newBalance = await ethers.provider.getBalance(contributors[i]); 
+       const diff = newBalance.sub(balances[i]); 
+       sum = sum.add(diff);
+    }
+    const loss = previousBalance.sub(sum);
+    if(loss.toString() != "0"){
+      console.log("loss: " + ethers.utils.formatEther(loss).toString() + " ether");
+    }
+    expect(loss.toString()).to.equal("0");
+  });
+ 
 
   after("Finalize", async function () {
     [signer, ownerA, ownerB, ownerC] = await ethers.getSigners();  
