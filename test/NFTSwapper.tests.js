@@ -67,10 +67,12 @@ describe("Initialize", function(){
     const balanceA = await lsp7Contract.balanceOf(ownerA.address);
     expect(balanceA.toNumber()).to.equal(100); 
 
+    /*
     const responseB = await lsp7Contract.mint(ownerB.address, 100);
     const receiptB = await responseB.wait();
     const balanceB = await lsp7Contract.balanceOf(ownerB.address);
     expect(balanceB.toNumber()).to.equal(100);
+    */
   });
  
   it("Mint LSP8", async function() {
@@ -85,12 +87,14 @@ describe("Initialize", function(){
       const [transferEventA] = receiptA.events;   
       expect(parseInt(transferEventA.args.tokenId)).to.equal(i); 
     }
+    /*
     for(let i = 11; i <= 20; i++) { 
       const responseB = await lsp8Contract.mint(ownerB.address);
       const receiptB = await responseB.wait();
       const [transferEventB] = receiptB.events; 
       expect(parseInt(transferEventB.args.tokenId)).to.equal(i);
     }
+    */
   });
    
   it("Deploy handlers", async function(){
@@ -151,7 +155,18 @@ describe("Initialize", function(){
     const [evApproveB1155] = rcApproveB1155.events;  
     expect(evApproveB1155.args.approved).to.equal(true);
 
-    // TODO LSP7 LSP8
+    const txApproveLSP7 = await lsp7Contract.connect(ownerA).authorizeOperator(lsp7Handler.address, 999999999);
+    const rcApproveLSP7 = await txApproveLSP7.wait();
+    const [evApproveLSP7] = rcApproveLSP7.events;
+    expect(evApproveLSP7.args.operator).to.equal(lsp7Handler.address);
+
+    const lsp8tokensIdOfA = await lsp8Contract.tokenIdsOf(ownerA.address);
+    for(let i = 0; i < lsp8tokensIdOfA.length; i++) {
+      const txApproveLSP8 = await lsp8Contract.connect(ownerA).authorizeOperator(lsp8Handler.address, lsp8tokensIdOfA[i]);
+      const rcApproveLSP8 = await txApproveLSP8.wait();
+      const [evApproveLSP8] = rcApproveLSP8.events;
+      expect(evApproveLSP8.args.operator).to.equal(lsp8Handler.address);
+    }
   });
 
 });
@@ -260,62 +275,7 @@ describe("NFTSwapper", function(){
     const txGetSwap = await swapperContract.connect(ownerA).getSwap(swapId);
     expect(txGetSwap.Tendered.length).to.equal(1);
   });
-   
-  it("Perform a swap", async function () {
-      
-      const swapId = 1;
-
-      const addA = [erc721Contract.address, erc1155Contract.address, lsp7Contract.address, lsp8Contract.address];
-      const idA = [1, 1, 1, 1];
-      const amoA = [1, 2, 10, 1]; 
-      const addB = [erc721Contract.address, erc721Contract.address];
-      const idB = [intToBytes32(11), intToBytes32(12)];
-      const amoB = [1, 1]; 
-
-      try{
-        const txSwapA = await swapperContract.connect(ownerA).swap(swapId);
-        const reSwapA = await txSwapA.wait();
-        console.log("Swap a swap by bidder should fail");
-        expect(false).to.equal(true); 
-      }catch(e){ 
-        //console.log(e);
-      }
- 
-      try{
-        const txSwapC = await swapperContract.connect(ownerC).swap(swapId);
-        const reSwapC = await txSwapC.wait();
-        console.log("Swap a swap by ownerC should fail");
-        expect(false).to.equal(true); 
-      }catch(e){ 
-        //console.log(e);
-      }
-
-      const txSwap = await swapperContract.connect(ownerB).swap(swapId);
-      const reSwap = await txSwap.wait(); 
-      const evSwap = reSwap.events[reSwap.events.length-1];
-      expect(evSwap.args.id.toNumber()).to.equal(swapId);
-      expect(evSwap.args.state).to.equal(2); 
-
-      const txGetSwap = await swapperContract.connect(ownerA).getSwap(swapId);
-      expect(txGetSwap.State).to.equal(2);
-
-      const ownerOfA0 = await erc721Contract.ownerOf(idA[0]);
-      expect(ownerOfA0 === ownerB.address).to.equal(true);
-      const ownerOfA1 = (await erc1155Contract.balanceOf(ownerB.address, idA[1])).toNumber();
-      expect(ownerOfA1 >= amoA[1]).to.equal(true);
-      const ownerOfA2 = (await lsp7Contract.balanceOf(ownerB.address)).toNumber();
-      expect(ownerOfA2 >= amoA[2]).to.equal(true);
-      const ownerOfA3 = (await lsp8Contract.tokenOwnerOf(intToBytes32(idA[3])));
-      console.log("ownerOfA3: " + ownerOfA3);
-      expect(ownerOfA3 === ownerB.address).to.equal(true);
-      
-
-      const ownerOfB0 = await erc721Contract.ownerOf(idB[0]);
-      expect(ownerOfB0 === ownerA.address).to.equal(true);
-      const ownerOfB1 = await erc721Contract.ownerOf(idB[1]);
-      expect(ownerOfB1 === ownerA.address).to.equal(true);
-  });
-
+  
   it("Register a long swap", async function(){
     const count = 200;
     const addA = [];
@@ -413,6 +373,60 @@ describe("NFTSwapper", function(){
 
     txGetSwaps = await swapperContract.getSwaps(zeroAddress);
     expect(txGetSwaps.length).to.equal(2);
+  });
+ 
+  it("Perform a swap", async function () {
+       
+    const addA = [erc721Contract.address, erc1155Contract.address, lsp7Contract.address, lsp8Contract.address];
+    const idA = [intToBytes32(1), intToBytes32(1), intToBytes32(1), intToBytes32(1)];
+    const amoA = [1, 2, 10, 1]; 
+    const addB = [erc721Contract.address, erc721Contract.address];
+    const idB = [intToBytes32(11), intToBytes32(12)];
+    const amoB = [1, 1]; 
+
+    const swapId = await registerSwap(ownerA.address, addA, idA, amoA, [ownerB.address], addB, idB, amoB);
+   
+    try{
+      const txSwapA = await swapperContract.connect(ownerA).swap(swapId);
+      const reSwapA = await txSwapA.wait();
+      console.log("Swap a swap by bidder should fail");
+      expect(false).to.equal(true); 
+    }catch(e){ 
+      //console.log(e);
+    }
+
+    try{
+      const txSwapC = await swapperContract.connect(ownerC).swap(swapId);
+      const reSwapC = await txSwapC.wait();
+      console.log("Swap a swap by ownerC should fail");
+      expect(false).to.equal(true); 
+    }catch(e){ 
+      //console.log(e);
+    }
+
+    const txSwap = await swapperContract.connect(ownerB).swap(swapId);
+    const reSwap = await txSwap.wait(); 
+    const evSwap = reSwap.events[reSwap.events.length-1];
+    expect(evSwap.args.id.toNumber()).to.equal(swapId);
+    expect(evSwap.args.state).to.equal(2); 
+   
+    const txGetSwap = await swapperContract.connect(ownerA).getSwap(swapId);
+    expect(txGetSwap.State).to.equal(2);
+    //console.log(txGetSwap);
+
+    const ownerOfA0 = await erc721Contract.ownerOf(idA[0]);
+    expect(ownerOfA0 === ownerB.address).to.equal(true);
+    const ownerOfA1 = (await erc1155Contract.balanceOf(ownerB.address, idA[1])).toNumber();
+    expect(ownerOfA1 >= amoA[1]).to.equal(true);
+    const ownerOfA2 = (await lsp7Contract.balanceOf(ownerB.address)).toNumber();
+    expect(ownerOfA2 >= amoA[2]).to.equal(true);
+    const ownerOfA3 = (await lsp8Contract.tokenOwnerOf(intToBytes32(idA[3])));
+    expect(ownerOfA3 === ownerB.address).to.equal(true);
+    
+    const ownerOfB0 = await erc721Contract.ownerOf(idB[0]);
+    expect(ownerOfB0 === ownerA.address).to.equal(true);
+    const ownerOfB1 = await erc721Contract.ownerOf(idB[1]);
+    expect(ownerOfB1 === ownerA.address).to.equal(true);
   });
 
   it("Support new standard", async function(){
