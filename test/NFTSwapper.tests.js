@@ -265,9 +265,9 @@ describe("NFTSwapper", function(){
       
       const swapId = 1;
 
-      const addA = [erc721Contract.address, erc1155Contract.address];
-      const idA = [1, 1];
-      const amoA = [1, 2]; 
+      const addA = [erc721Contract.address, erc1155Contract.address, lsp7Contract.address, lsp8Contract.address];
+      const idA = [1, 1, 1, 1];
+      const amoA = [1, 2, 10, 1]; 
       const addB = [erc721Contract.address, erc721Contract.address];
       const idB = [intToBytes32(11), intToBytes32(12)];
       const amoB = [1, 1]; 
@@ -303,6 +303,13 @@ describe("NFTSwapper", function(){
       expect(ownerOfA0 === ownerB.address).to.equal(true);
       const ownerOfA1 = (await erc1155Contract.balanceOf(ownerB.address, idA[1])).toNumber();
       expect(ownerOfA1 >= amoA[1]).to.equal(true);
+      const ownerOfA2 = (await lsp7Contract.balanceOf(ownerB.address)).toNumber();
+      expect(ownerOfA2 >= amoA[2]).to.equal(true);
+      const ownerOfA3 = (await lsp8Contract.tokenOwnerOf(intToBytes32(idA[3])));
+      console.log("ownerOfA3: " + ownerOfA3);
+      expect(ownerOfA3 === ownerB.address).to.equal(true);
+      
+
       const ownerOfB0 = await erc721Contract.ownerOf(idB[0]);
       expect(ownerOfB0 === ownerA.address).to.equal(true);
       const ownerOfB1 = await erc721Contract.ownerOf(idB[1]);
@@ -457,18 +464,20 @@ describe("NFTSwapper", function(){
 
   it("Change share of contributor", async function(){
  
-    const txSetContributor = await swapperContract.setContributor(signer.address, 50);
+    const share = 70;
+    const txSetContributor = await swapperContract.setContributor(signer.address, share);
     const rcSetContributor = await txSetContributor.wait();
 
     var contributors = await swapperContract.getContributors();
     expect(contributors.length).to.equal(1);
 
     var totalShares = await swapperContract.getTotalShares();
-    expect(totalShares.toNumber()).to.equal(50);
+    expect(totalShares.toNumber()).to.equal(share);
 
   });
 
   it("Only contributor", async function(){
+
     try{ 
       var totalShares = await swapperContract.connect(ownerA).getTotalShares(); 
       console.log("getTotalShares by ownerA should fail");
@@ -477,11 +486,12 @@ describe("NFTSwapper", function(){
       //console.log(e);
     }
 
-    const txSetContributor = await swapperContract.setContributor(ownerA.address, 50);
+    const share = 30;
+    const txSetContributor = await swapperContract.setContributor(ownerA.address, share);
     const rcSetContributor = await txSetContributor.wait();
 
     var shareA = await swapperContract.connect(ownerA).getShare(ownerA.address); 
-    expect(shareA.toNumber()).to.equal(50);
+    expect(shareA.toNumber()).to.equal(share);
   });
 
   it("Change fees", async function(){
@@ -556,7 +566,7 @@ describe("NFTSwapper", function(){
 
   });
 
-  it("Withdraw fee", async function(){
+  it("Withdraw", async function(){
 
     const contributors = await swapperContract.getContributors();
     expect(contributors.length).to.equal(2);
@@ -566,6 +576,7 @@ describe("NFTSwapper", function(){
     }
 
     const previousBalance = await ethers.provider.getBalance(swapperContract.address);
+    //console.log("previousBalance: " + ethers.utils.formatEther(previousBalance).toString(), " ether");
 
     try{
       const txWithdraw = await swapperContract.connect(ownerB).withdraw(); 
@@ -588,11 +599,12 @@ describe("NFTSwapper", function(){
        const diff = newBalance.sub(balances[i]); 
        sum = sum.add(diff);
     }
-    const loss = previousBalance.sub(sum);
-    if(loss.toString() != "0"){
-      console.log("loss: " + ethers.utils.formatEther(loss).toString() + " ether");
+    const loss = previousBalance.sub(sum).sub(reWithdraw.gasUsed.mul(1000000000)); 
+    const isok = loss.lt(ethers.utils.parseEther("0.0000001"));
+    if(!isok){
+      console.log("loss: " + ethers.utils.formatEther(loss).toString() + " ether"); 
     }
-    expect(loss.toString()).to.equal("0");
+    expect(isok).to.equal(true);
   });
  
 
