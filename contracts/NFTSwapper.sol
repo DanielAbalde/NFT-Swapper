@@ -13,6 +13,7 @@ contract NFTSwapper is Context, Ownable
     enum SwapState{ Pending, Cancelled, Completed } 
    
     event SwapStateChanged(uint256 indexed id, SwapState indexed state);
+    event WithdrawBalance(address indexed sender, uint256 indexed amount);
 
     struct Token {
         address NFT;
@@ -132,23 +133,15 @@ contract NFTSwapper is Context, Ownable
         emit SwapStateChanged(id, SwapState.Pending);
     }
 
-    function swap(uint256 id/*, address[] memory nfts, bytes32[] memory tokenIds, uint256[] memory amounts*/) public payable
+    function swap(uint256 id) public payable
                     existsSwapId(id)
                     onlyTendered(id, _msgSender())
                     stillPending(id)
     {
         require(msg.value >= getSwapFee(), "NFTSwapper: swap: insufficient value for swap");
         Swap storage s = _swaps[id]; 
-        /*require(nfts.length == tokenIds.length, "NFTSwapper: swap: nfts and tokenIds must have the same length");
-        require(nfts.length == amounts.length, "NFTSwapper: swap: nfts and amounts must have the same length");
-        require(nfts.length == s.Demand.length, "NFTSwapper: swap: given NFTs length different from expected NFTs length");
-**/
         for(uint256 i=0; i<s.Demand.length; i++){
-            Token storage token = s.Demand[i];
-            /*require(token.NFT == nfts[i], "NFTSwapper: swap: given NFT doesn't match demanded NFT");
-            require(token.TokenId == tokenIds[i], "NFTSwapper: swap: given tokenId doesn't match demanded tokenId");
-            require(token.Amount == amounts[i], "NFTSwapper: swap: given tokenId doesn't match demanded tokenId");
-            */ISwapperHandler handler = getHandler(token.NFT); 
+            Token storage token = s.Demand[i];ISwapperHandler handler = getHandler(token.NFT); 
             require(handler.isOwnerOf(_msgSender(), token.NFT, token.TokenId, token.Amount), "NFTSwapper: swap: sender is not the owner of demanded NFTs");
             require(handler.transferOwnership(_msgSender(), token.NFT, token.TokenId, token.Amount, s.Bidder), "NFTSwapper: swap: transfer from tendered to bidder failed");  
         }
@@ -315,6 +308,7 @@ contract NFTSwapper is Context, Ownable
             uint256 amount = balance * share / _totalShares;
             contributor.transfer(amount);
         }
+        emit WithdrawBalance(_msgSender(), balance);
     }
     
     receive() external payable {}
