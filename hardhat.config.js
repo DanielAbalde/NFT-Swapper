@@ -32,6 +32,12 @@ module.exports = {
         accounts: { mnemonic: MNEMONIC, initialIndex: 1 }, 
         //gasPrice: 45000000000,
         //gas: 20000000 
+      },
+      lukso_testnet: {
+        url: "https://rpc.l16.lukso.network",
+        accounts: { mnemonic: MNEMONIC, initialIndex: 0 },
+        gasPrice: 20000000000,
+        gas: 6000000
       }
    },
    gasReporter: {

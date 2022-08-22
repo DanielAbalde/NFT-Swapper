@@ -9,7 +9,7 @@ contract Test721 is ERC721
 
   constructor() ERC721("Test", "TEST"){ }
  
- function mint(address to) public returns (uint256 tokenId) { 
+  function mint(address to) public returns (uint256 tokenId) { 
     tokenId = ++_tokenCount; 
     _safeMint(to, tokenId, "");
   }

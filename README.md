@@ -5,14 +5,14 @@
 
 Instead of listing your NFTs and waiting for an offer, this exchanger registers an agreement to swap specific tokens for other specific tokens. The registry creator chooses who and what to exchange, and the swap takes place when the second party accepts the deal. It is generic or extensible to other types of tokens, both fungible and non-fungible.
 
-The main contract is the [NFTSwapper](./contracts/NFTSwapper.sol), where swaps are stored and handled. For each type of token, there is a specific contract that follows the [ISwapperHandler](./contracts/ISwapperHandler.sol) interface. These are responsible for the transfer, so these are the addresses to be approved as operators.
+The main contract is the [NFTSwapper](./contracts/NFTSwapper.sol), where swaps are stored and handled. For each type of token, there is a specific contract that follows the [ISwapperHandler](./contracts/ISwapperHandler.sol) interface. These are responsible for the transfer, so these are the addresses to be approved as operators by the NFT owners.
 
 ### Contract Addresses 🔑
 
 | Chain	| Swapper | ERC721 | ERC1155 | LSP7 | LSP8 | 
 |:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
 | Mumbai	| [0xa211...c8c](https://mumbai.polygonscan.com/address/0xa2119757427C842670aDba41FaeF914fcC9eDc8c#code) | [0xE406...825](https://mumbai.polygonscan.com/address/0xE40692FFdCAf5703EdB523863E86fa1e9F8D2825#code) | [0x8c5d...a97](https://mumbai.polygonscan.com/address/0x8c5d6396489fE528B227D62fA3483bb346824a97#code) | [0x7eCF...73C](https://mumbai.polygonscan.com/address/0x7eCFb1D1BB649F8C7bBf099B15f68D7Cb662a73C#code) | [0xC243...04D](https://mumbai.polygonscan.com/address/0xC2439e3ED3Be3f8723C84eAb8aD8DCAb9243804D#code) |
-
+| L16 | [0xB5Ed...B69](https://explorer.execution.l16.lukso.network/address/0xB5EdfF2d1c3a6d3d0664D170c990179e88028B69/transactions) | - | - | [0xC3C2...9f40](https://explorer.execution.l16.lukso.network/address/0xC3C2a3f3017605b7199250056359eC3Db95d9f40/transactions) | [0xa3A3...4fB](https://explorer.execution.l16.lukso.network/address/0xa3A3E1fB1B3C42296bBC45b3Cd2bc5dd3aE454fB/transactions) |
 
 ### Steps 🗺️
 * Create a new swap agreement by registering the bidder, tendered, NFT contract addresses, the token IDs and amounts.
