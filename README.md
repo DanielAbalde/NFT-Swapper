@@ -1,24 +1,23 @@
-<h3 align="center">NFT SWAPPER (WIP)</h3> 
-<p align="center">Peer to peer exchange of multiple NFTs for EVM chains</p>
+<h3 align="center">NFT SWAPPER (BETA)</h3> 
+<p align="center">Peer to peer exchange of multiple NFTs on EVM chains</p>
  
 
 
-When you want to exchange one or more NFTs with another person, so that you give them yours in exchange for them giving you theirs, the first person to send them needs to trust that the second person will do so as well. NFT Swapper solves this problem by using the contract as an intermediary, so that you can only claim each other's NFTs when you have both deposited yours.
+Instead of listing your NFTs and waiting for an offer, this exchanger registers an agreement to swap specific tokens for other specific tokens. The registry creator chooses who and what to exchange, and the swap takes place when the second party accepts the deal. It is generic or extensible to other types of tokens, both fungible and non-fungible.
 
-The contracts listed here do not charge any commission, they are free to use. They also have no owner or administration mechanisms so everything is controlled by the user.
+The main contract is the [NFTSwapper](./contracts/NFTSwapper.sol), where swaps are stored and handled. For each type of token, there is a specific contract that follows the [ISwapperHandler](./contracts/ISwapperHandler.sol) interface. These are responsible for the transfer, so these are the addresses to be approved as operators.
 
-### Guide 🗺️ (WIP)
+### Contract Addresses 🔑
+
+| Chain	| Swapper | ERC721 | ERC1155 | LSP7 | LSP8 | 
+|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
+| Mumbai	| [0xa211...c8c](https://mumbai.polygonscan.com/address/0xa2119757427C842670aDba41FaeF914fcC9eDc8c#code) | [0xE406...825](https://mumbai.polygonscan.com/address/0xE40692FFdCAf5703EdB523863E86fa1e9F8D2825#code) | [0x8c5d...a97](https://mumbai.polygonscan.com/address/0x8c5d6396489fE528B227D62fA3483bb346824a97#code) | [0x7eCF...73C](https://mumbai.polygonscan.com/address/0x7eCFb1D1BB649F8C7bBf099B15f68D7Cb662a73C#code) | [0xC243...04D](https://mumbai.polygonscan.com/address/0xC2439e3ED3Be3f8723C84eAb8aD8DCAb9243804D#code) |
+
+
+### Steps 🗺️
 * Create a new swap agreement by registering the bidder, tendered, NFT contract addresses, the token IDs and amounts.
-* Owners of NFTs must approve as operator the Swapper contract address on the NFT contracts. 
+* Owners of NFTs must approve as operator the Swapper handlers addresses on the NFT contracts. 
 * One tendered can claim the swap and both receive the other's NFTs.
-
-### Contract Addresses 🔑 (OBSOLETE)
-
-| Chain	| ERC721 |
-|:-------:|:-------:|
-| Polygon	| [0xe1600C43b7113b5Eb18d6B2F4f5d4189Ad27F9b0](https://polygonscan.com/address/0xe1600C43b7113b5Eb18d6B2F4f5d4189Ad27F9b0) |
-| Mumbai	| [0xEd1D7d05d79AB4F980FBAB452bCD4da365a66548](https://mumbai.polygonscan.com/address/0xEd1D7d05d79AB4F980FBAB452bCD4da365a66548) |
-
 
 ### Contribute ☕
 * Issues and Pull Request on Github are welcome.

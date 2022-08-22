@@ -6,7 +6,7 @@ require('dotenv').config();
 require("@nomiclabs/hardhat-ethers");
 require("@nomiclabs/hardhat-etherscan");
 require("hardhat-gas-reporter");
- 
+
 const { API_URL_MATIC, API_URL_MUMBAI, MNEMONIC, POLYGONSCAN_API_KEY } = process.env;
 
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
@@ -24,11 +24,12 @@ module.exports = {
       polygon_mumbai: {
         url: API_URL_MUMBAI,
         accounts: { mnemonic: MNEMONIC, initialIndex: 0 }, 
-        gasPrice: 45000000000
+        gasPrice: 20000000000,
+        gas: 6000000,
       },
       polygon_matic:{
         url: API_URL_MATIC,
-        accounts: { mnemonic: MNEMONIC, initialIndex: 1 },  
+        accounts: { mnemonic: MNEMONIC, initialIndex: 1 }, 
         //gasPrice: 45000000000,
         //gas: 20000000 
       }

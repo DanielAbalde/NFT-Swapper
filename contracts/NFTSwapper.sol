@@ -42,10 +42,7 @@ contract NFTSwapper is Context, Ownable
     ISwapperHandler[] private _handlers;  
     Counters.Counter private _counter;
     
-    constructor(address[] memory handlerAddresses) { 
-        for (uint256 i = 0; i < handlerAddresses.length; i++) {
-            supportStandard(handlerAddresses[i]);
-        }
+    constructor() {
         setContributor(_msgSender(), 100);
     }
  
@@ -191,9 +188,6 @@ contract NFTSwapper is Context, Ownable
         }  
     }
 
-    /**
-    * @dev Get a swap. 
-    */
     function getSwap(uint256 id) public view existsSwapId(id) returns(Swap memory){
         return _swaps[id];
     }
@@ -202,9 +196,6 @@ contract NFTSwapper is Context, Ownable
         return _participants[account];
     }
 
-    /**
-    * @dev Get the amount of swaps. 
-    */
     function getSwapCount() public view virtual returns(uint256){
         return _counter.current();
     }

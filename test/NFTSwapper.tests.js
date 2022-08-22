@@ -116,9 +116,13 @@ describe("Initialize", function(){
   it("Deploy Swapper", async function() {
  
     const swapperFactory = await ethers.getContractFactory("NFTSwapper");
-    swapperContract = await swapperFactory.deploy(handlers);
+    swapperContract = await swapperFactory.deploy();
     await swapperContract.deployed();
 
+    for(let i = 0; i < handlers.length; i++) { 
+      const txSupportStandards = await swapperContract.supportStandard(handlers[i]);
+      await txSupportStandards.wait();
+    }
   });
 
   it("Get dedicated handler", async function() {
